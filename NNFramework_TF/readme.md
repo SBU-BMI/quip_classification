@@ -56,24 +56,24 @@ python sa_runners/tf-classifier_runner.py $HOME/NNFramework/config/config_tcga_r
 
 
 
-### Running batch jobs with Singularity
-#### To create a writable Singularity container:
-Build a sandbox to have a writable container to be able to install scikit-image and any future required libraries:
-module load singularity/3.0.0
-export SINGULARITY_DOCKER_USERNAME='$oauthtoken'
-export SINGULARITY_DOCKER_PASSWORD=< token >
-singularity build --sandbox tf-18.11-py3-w docker://nvcr.io/nvidia/tensorflow:18.11-py3
-
-#### Load and run inside the sandbox Singularity container:
-module unload singularity
-module load singularity/2.5.1
-singularity run --writable  --bind $SCRATCH --nv $SCRATCH/containers/tensorflow/tf-18.11-py3-w
-cd < NNFramework_TF directory >
-python sa_runners/tf-classifier_runner.py $HOME/NNFramework/config_tcga_resnet-101.ini
-
-#### Run as a SLURM batch job:
-Run one of the batch files in the batch_files folder. *Example:*
-sbatch batch_files/batch_tcga_resnet101.sh
-
+### Running batch jobs with Singularity  
+#### To create a writable Singularity container:  
+Build a sandbox to have a writable container to be able to install scikit-image and any future required libraries:  
+module load singularity/3.0.0  
+export SINGULARITY_DOCKER_USERNAME='$oauthtoken'  
+export SINGULARITY_DOCKER_PASSWORD=< token >  
+singularity build --sandbox tf-18.11-py3-w docker://nvcr.io/nvidia/tensorflow:18.11-py3  
+  
+#### Load and run inside the sandbox Singularity container:  
+module unload singularity  
+module load singularity/2.5.1  
+singularity run --writable  --bind $SCRATCH --nv $SCRATCH/containers/tensorflow/tf-18.11-py3-w  
+cd < NNFramework_TF directory >  
+python sa_runners/tf-classifier_runner.py $HOME/NNFramework/config_tcga_resnet-101.ini  
+  
+#### Run as a SLURM batch job:  
+Run one of the batch files in the batch_files folder. *Example:*  
+sbatch batch_files/batch_tcga_resnet101.sh  
+  
 
 
