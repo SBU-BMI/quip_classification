@@ -2,7 +2,8 @@
 ## CNN training with Tensorflow
 
 ### Configuration file:
-To run training create a configuration file similar to config/config_tcga_resnet-101.ini
+To run training create a configuration file similar to config/config_tcga_resnet-101.ini.
+
 Below are the main parameters that may need to be adjusted for a run:
 
 ##### DEFAULT section:
@@ -49,6 +50,7 @@ Current supported runner file is: *tf-classifier_runner.py*
 
 ### Running command:
 To run use a command with the following format:
-python <runner py file> <config file full path>
+python < runner py file > < config file full path >
+
 *Example:*
 python sa_runners/tf-classifier_runner.py $HOME/NNFramework/config/config_tcga_resnet-101.ini
