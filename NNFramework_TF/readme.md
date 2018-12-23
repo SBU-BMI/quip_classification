@@ -55,6 +55,7 @@ python < runner py file > < config file full path >
 python sa_runners/tf-classifier_runner.py $HOME/NNFramework/config/config_tcga_resnet-101.ini
 
 
+
 ### Running batch jobs with Singularity
 #### To create a writable Singularity container:
 Build a sandbox to have a writable container to be able to install scikit-image and any future required libraries:
