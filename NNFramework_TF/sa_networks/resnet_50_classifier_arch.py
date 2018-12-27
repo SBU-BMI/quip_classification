@@ -1,5 +1,5 @@
 # author: Shahira Abousamra <shahira.abousamra@stonybrook.edu>
-# created: 12.23.2018 
+# created: 12.26.2018 
 # ==============================================================================
 import sys;
 import os;
@@ -19,15 +19,15 @@ import sys;
 #from nets.inception_resnet_v2 import inception_resnet_v2
 #from nets.inception_resnet_v2 import inception_resnet_v2_arg_scope
 #from nets.inception_resnet_v2 import inception_resnet_v2_base
-from sa_networks.inception_resnet_v2 import inception_resnet_v2
-from sa_networks.inception_resnet_v2 import inception_resnet_v2_arg_scope
-from sa_networks.inception_resnet_v2 import inception_resnet_v2_base
+#from sa_networks.inception_resnet_v2 import inception_resnet_v2
+#from sa_networks.inception_resnet_v2 import inception_resnet_v2_arg_scope
+#from sa_networks.inception_resnet_v2 import inception_resnet_v2_base
 #from sa_networks.inception_v3 import inception_v3
 #from sa_networks.inception_v3 import inception_v3_arg_scope
-#from sa_networks.resnet_v1 import resnet_v1_50
-#from sa_networks.resnet_v1 import resnet_arg_scope
+from sa_networks.resnet_v1 import resnet_v1_50
+from sa_networks.resnet_v1 import resnet_arg_scope
 
-class InceptionResnetV2ClassifierArch(AbstractCNNArch):
+class Resnet50ClassifierArch(AbstractCNNArch):
     def __init__(self, n_channels, n_classes, model_out_path, model_base_filename, model_restore_filename, cost_func:AbstractCostFunc, kwargs):
         args = {'input_img_width':-1, 'input_img_height':-1, 'pretrained':False, 'freeze_layers':-1, 'extra_end_layer':-1, 
             'get_features': 'False', 'official_checkpoint':'False'};
@@ -66,7 +66,7 @@ class InceptionResnetV2ClassifierArch(AbstractCNNArch):
         self.accuracy = self.get_accuracy();
 
         variables_to_restore = slim.get_variables_to_restore(exclude=['Variable', 'Variable_1', 'Variable_2', 'Variable_3', \
-            'InceptionResnetV2/AuxLogits', 'InceptionResnetV2/Logits'])
+            'resnet_v1_50/logits'])
         #print ([v.name for v in variables_to_restore]);
         #self.saver = tf.train.Saver(var_list =variables_to_restore[1:], max_to_keep=100000);
         self.saver_official = tf.train.Saver(var_list =variables_to_restore, max_to_keep=100000);
@@ -84,8 +84,8 @@ class InceptionResnetV2ClassifierArch(AbstractCNNArch):
         keep_prob = dropout;
 
 
-        with slim.arg_scope(inception_resnet_v2_arg_scope()):
-            logits, end_points = inception_resnet_v2(input_x, num_classes=self.n_classes, is_training=isTraining)
+        with slim.arg_scope(resnet_arg_scope()):
+            logits, end_points = resnet_v1_50(input_x, num_classes=self.n_classes, is_training=isTraining)
         #with slim.arg_scope(inception_v3_arg_scope()):
         #    logits, end_points = inception_v3(input_x, num_classes=self.n_classes, is_training=isTraining)
         #with slim.arg_scope(inception_v3_arg_scope()):
@@ -121,7 +121,9 @@ class InceptionResnetV2ClassifierArch(AbstractCNNArch):
 
         if(self.official_checkpoint):
             self.saver_official.restore(sess, self.filepath);
+            self.official_checkpoint = False;
         else:
+            print('self.filepath = ', self.filepath );
             self.saver.restore(sess, self.filepath);
         print('after restore');
 

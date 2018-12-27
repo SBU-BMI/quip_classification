@@ -11,14 +11,12 @@ from sa_net_arch import AbstractCNNArch;
 from sa_net_arch_utilities import CNNArchUtils;
 from sa_net_optimizer import OptimizerTypes, CNNOptimizer;
 from sa_net_data_provider import AbstractDataProvider;
-import sys 
-import time
+
 
 class ClassifierTrainer(CNNTrainer):
     def __init__(self, cnn_arch:AbstractCNNArch, train_data_provider:AbstractDataProvider, validate_data_provider:AbstractDataProvider, optimizer_type, session_config, kwargs):
         # predefined list of arguments
-        args = {'max_epochs':1000, 'learning_rate': 0.0005, 'batch_size':256, 'epoch_size':10, 'display_step':5, 'save_best_only':'False'
-            , 'subepoch_checkpoint_step':-1};
+        args = {'max_epochs':1000, 'learning_rate': 0.0005, 'batch_size':256, 'epoch_size':10, 'display_step':5, 'save_best_only':'False'};
         args.update(kwargs);
 
         self.cnn_arch = cnn_arch;
@@ -28,9 +26,7 @@ class ClassifierTrainer(CNNTrainer):
         self.optimizer_type = optimizer_type;
         if(session_config == None):
             self.session_config = tf.ConfigProto();
-            #self.session_config.gpu_options.per_process_gpu_memory_fraction = 0.6
-            self.session_config.gpu_options.allow_growth = True
-            #self.session_config.log_device_placement = True
+            self.session_config.gpu_options.per_process_gpu_memory_fraction = 0.9
         else:
             self.session_config = session_config;
         self.max_epochs = int(args['max_epochs']);
@@ -41,7 +37,6 @@ class ClassifierTrainer(CNNTrainer):
         self.display_step = int(args['display_step']);
         self.global_step = tf.Variable(0);
         self.save_best_only = bool(strtobool(args['save_best_only']));
-        self.subepoch_checkpoint_step = int(args['subepoch_checkpoint_step']);
 
         self.init = tf.global_variables_initializer();
         if(self.optimizer_type == OptimizerTypes.ADAM):
@@ -54,23 +49,6 @@ class ClassifierTrainer(CNNTrainer):
         self.minibatch_out_filewriter = open(self.minibatch_out_filename, 'a+' );
         best_saved_model_filename = None;
         last_saved_model_filename = None;
-        last_saved_subepoch_model_filename = None;
-
-        if(do_load_data):
-            self.train_data_provider.load_data();
-            if(not (self.validate_data_provider is None)):
-                self.validate_data_provider.load_data();            
-
-        if(self.epoch_size < 0):
-            self.epoch_size = round(self.train_data_provider.data_count / float(self.batch_size) + 0.5);
-        if(not(self.validate_data_provider is None)):
-            self.validate_epoch_size = round(self.validate_data_provider.data_count / float(self.batch_size) + 0.5);
-
-        best_validation_accuracy = 0;
-        best_train_val_avg_accuracy = 0;
-        current_validation_accuracy = None;
-        current_train_val_avg_accuracy = None;    
-
         with tf.Session(config=self.session_config) as sess:
             with sess.as_default():
                 if(do_init):
@@ -79,64 +57,44 @@ class ClassifierTrainer(CNNTrainer):
                 if(do_restore):
                     #print('before restore');
                     self.cnn_arch.restore_model(sess);
-                    epoch_start_num = self.cnn_arch.epochs_count.eval();            
                     #print('after restore');
-                    if(self.subepoch_checkpoint_step > 0):
-                        self.train_data_provider.restore_state(self.cnn_arch.model_restore_filename);
-                counter = 0;
-                #while(True):
-                #    counter +=1;
-                #    if counter % 1000 == 0: 
-                #        print(counter);
+                if(do_load_data):
+                    self.train_data_provider.load_data();
+                    if(not (self.validate_data_provider is None)):
+                        self.validate_data_provider.load_data();            
+                epoch_start_num = self.cnn_arch.epochs_count.eval();            
 
+                if(self.epoch_size < 0):
+                    self.epoch_size = int(self.train_data_provider.data_count / float(self.batch_size) + 0.5);
+                if(not(self.validate_data_provider is None)):
+                    self.validate_epoch_size = int(self.validate_data_provider.data_count / float(self.batch_size) + 0.5);
+
+                best_validation_accuracy = 0;
+                best_train_val_avg_accuracy = 0;
+                current_validation_accuracy = None;
+                current_train_val_avg_accuracy = None;    
                 for epoch in range(epoch_start_num, self.max_epochs):
                     total_cost = 0;
                     total_correct_count = 0;
                     total_count = 0;
                     for step in range(0, self.epoch_size):
-                        #tic1 = time.time();
                         batch_x, batch_label = self.train_data_provider.get_next_n(self.batch_size);
-                        #print('batch size = ', batch_x.eval().shape[0]);
-                        #print('label size = ', batch_label.eval().shape[0]);
-                        #tic2 = time.time();
-                        #print('time data = ', tic2 - tic1);
-                        sys.stdout.flush()
-                        #opt, cost, correct_pred  = sess.run([self.optimizer, self.cnn_arch.cost, self.cnn_arch.correct_pred] \
-                        #        , feed_dict={self.cnn_arch.input_x: batch_x.eval() \
-                        #        , self.cnn_arch.labels: batch_label.eval() \
-                        #        , self.cnn_arch.isTest: False \
-                        #        , self.cnn_arch.isTraining: True \
-                        #    });
-                        #batch_count = batch_label.eval().shape[0];
-
-                        #tic1 = time.time();
                         opt, cost, correct_pred  = sess.run([self.optimizer, self.cnn_arch.cost, self.cnn_arch.correct_pred] \
-                                , feed_dict={self.cnn_arch.input_x: batch_x \
-                                , self.cnn_arch.labels: batch_label \
+                                , feed_dict={self.cnn_arch.input_x: batch_x.eval() \
+                                , self.cnn_arch.labels: batch_label.eval() \
                                 , self.cnn_arch.isTest: False \
                                 , self.cnn_arch.isTraining: True \
                             });
-                        #tic2 = time.time();
-                        #print('time cost = ', tic2 - tic1);
-                        #sys.stdout.flush()
-
-                        batch_count = batch_label.shape[0];
                  
                         total_cost += cost;
                         batch_correct_count = correct_pred.sum();
                         total_correct_count += batch_correct_count;
+                        batch_count = batch_label.eval().shape[0];
                         total_count += batch_count;
 
                         if step % self.display_step == 0:
                             #self.output_minibatch_info(epoch, cost)
                             self.output_minibatch_info(epoch, step, cost, batch_correct_count, batch_count)
-
-                        if(self.subepoch_checkpoint_step > 0 and step > 0 and step % self.subepoch_checkpoint_step == 0):
-                            new_saved_subepoch_model_filename = self.cnn_arch.save_model(sess, self.optimizer, epoch, suffix="_step=_{:06d}".format(step));
-                            self.delete_model_files(last_saved_subepoch_model_filename);
-                            last_saved_subepoch_model_filename = new_saved_subepoch_model_filename;
-                            self.train_data_provider.save_state(last_saved_subepoch_model_filename);
-
                                                     
 
                     print('mean loss = ', total_cost/float(total_count))
@@ -159,7 +117,7 @@ class ClassifierTrainer(CNNTrainer):
                             , self.epoch_out_filewriter);
                         self.validate_data_provider.reset();
                         if(not(self.validate_data_provider is None)):
-                            self.validate_epoch_size = round(self.validate_data_provider.data_count / float(self.batch_size) + 0.5);
+                            self.validate_epoch_size = int(self.validate_data_provider.data_count / float(self.batch_size) + 0.5);
                         validate_total_loss = 0;
                         validate_correct_count = 0;
                         validate_count = 0;
@@ -167,22 +125,15 @@ class ClassifierTrainer(CNNTrainer):
                             validate_batch_x, validate_batch_label = self.validate_data_provider.get_next_n(self.batch_size);
                             if(validate_batch_x is None):
                                 break;
-                            #cost, correct_pred  = sess.run([self.cnn_arch.cost, self.cnn_arch.correct_pred] \
-                            #    , feed_dict={self.cnn_arch.input_x: validate_batch_x.eval() \
-                            #    , self.cnn_arch.labels: validate_batch_label.eval() \
-                            #    , self.cnn_arch.isTest: True \
-                            #});
-                            #validate_count += validate_batch_label.eval().shape[0];
-                 
                             cost, correct_pred  = sess.run([self.cnn_arch.cost, self.cnn_arch.correct_pred] \
-                                , feed_dict={self.cnn_arch.input_x: validate_batch_x \
-                                , self.cnn_arch.labels: validate_batch_label \
+                                , feed_dict={self.cnn_arch.input_x: validate_batch_x.eval() \
+                                , self.cnn_arch.labels: validate_batch_label.eval() \
                                 , self.cnn_arch.isTest: True \
                             });
-                            validate_count += validate_batch_label.shape[0];
-
+                 
                             validate_total_loss += cost;
                             validate_correct_count += correct_pred.sum();
+                            validate_count += validate_batch_label.eval().shape[0];
                             #break;
 
                         current_validation_accuracy = validate_correct_count / float(validate_count);
@@ -215,7 +166,7 @@ class ClassifierTrainer(CNNTrainer):
 		                # permute the training data for the next epoch
                         self.train_data_provider.reset(repermute=True);
                         if(self.epoch_size_config < 0):
-                            self.epoch_size = round(self.train_data_provider.data_count / float(self.batch_size) + 0.5);
+                            self.epoch_size = int(self.train_data_provider.data_count / float(self.batch_size) + 0.5);
 
                 print("Optimization Finished!")
 
@@ -237,19 +188,14 @@ class ClassifierTrainer(CNNTrainer):
             + ", correct count= " + "{:d}".format(correct_count) \
             + ", total count= " + "{:d}".format(total_count) \
             + ", accuracy = " + "{:.6f}".format(correct_count/float(total_count)) \
-            + ", time=" + str(time.asctime(time.localtime())) \
-            + ", tlapse= " + str(time.process_time()) \
         );
-        sys.stdout.flush()
-        self.write_to_filename("epoch = " + str(epoch) \
+        self.write_to_file("epoch = " + str(epoch) \
             + ", batch# = " + str(batch) \
             + ", minibatch loss= " + "{:.6f}".format(cost) \
             + ", correct count= " + "{:d}".format(correct_count) \
             + ", total count= " + "{:d}".format(total_count) \
             + ", accuracy = " + "{:.6f}".format(correct_count/float(total_count)) \
-            + ", time=" + str(time.asctime(time.localtime())) \
-            + ", tlapse= " + str(time.process_time()) \
-            , self.minibatch_out_filename
+            , self.minibatch_out_filewriter
         );
 
 
@@ -260,39 +206,25 @@ class ClassifierTrainer(CNNTrainer):
             + ", total count= " + "{:d}".format(total_count) \
             + ", accuracy = " + "{:.6f}".format(correct_count/float(total_count)) \
         );
-        sys.stdout.flush()
-        self.write_to_filename("epoch = " + str(epoch) \
+        self.write_to_file("epoch = " + str(epoch) \
             + ", avg loss= " + "{:.6f}".format(total_cost / n_batches) \
             + ", correct count= " + "{:d}".format(correct_count) \
             + ", total count= " + "{:d}".format(total_count) \
             + ", accuracy = " + "{:.6f}".format(correct_count/float(total_count)) \
-            + ", time=" + str(time.asctime(time.localtime())) \
-            + ", tlapse= " + str(time.process_time()) \
-            , self.epoch_out_filename
+            , self.epoch_out_filewriter
         );
-        self.write_to_filename("\r\n epoch = " + str(epoch) \
+        self.write_to_file("\r\n epoch = " + str(epoch) \
             + ", avg loss= " + "{:.6f}".format(total_cost / n_batches) \
             + ", correct count= " + "{:d}".format(correct_count) \
             + ", total count= " + "{:d}".format(total_count) \
             + ", accuracy = " + "{:.6f}".format(correct_count/float(total_count)) \
-            + ", time=" + str(time.asctime(time.localtime())) \
-            + ", tlapse= " + str(time.process_time()) \
-            , self.minibatch_out_filename
+            , self.minibatch_out_filewriter
         );
 
     def write_to_file(self, text, filewriter):
         filewriter.write('\r\n');
         filewriter.write(text);
         filewriter.flush();
-
-    def write_to_filename(self, text, filename):
-        filewriter = open(filename, 'a+' );
-        filewriter.write('\r\n');
-        filewriter.write(text);
-        filewriter.flush();
-        filewriter.close()
-
-
 
 #    def print_optimizer_params(self):
 #        # Print optimizer's state_dict

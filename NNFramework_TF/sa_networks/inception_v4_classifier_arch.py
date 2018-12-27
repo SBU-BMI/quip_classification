@@ -125,8 +125,10 @@ class InceptionV4ClassifierArch(AbstractCNNArch):
             self.saver.restore(sess, self.filepath);
         print('after restore');
 
-    def save_model(self, sess, optimizer, epoch):
-        postfix = '_epoch_{:04d}'.format(epoch);
+    def save_model(self, sess, optimizer, epoch, suffix=""):
+        postfix = '_epoch_{:04d}'.format(epoch) ;
+        if(suffix is not None):
+            postfix += suffix;
         self.filepath = os.path.join(self.model_out_path, self.model_base_filename+ postfix + '.ckpt');
         print('self.filepath = ', self.filepath);
         self.saver.save(sess, self.filepath);

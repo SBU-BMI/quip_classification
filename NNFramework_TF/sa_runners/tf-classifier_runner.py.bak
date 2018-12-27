@@ -136,12 +136,7 @@ if __name__ == "__main__":
         print('error: cost function class name \'{}\' is not supported by runner'.format(cost_func_class_name));
         sys.exit();        
 
-    
-    if(network_class_name == 'SimpleClassifier'):
-        cnn_arch = SimpleClassifierArch(n_channels = n_channels, n_classes = n_classes, model_out_path = model_path, model_base_filename = model_base_filename, model_restore_filename = model_restore_filename, cost_func = cost_func \
-            , kwargs=network_params \
-            );
-    elif(network_class_name == 'InceptionResnetV2Classifier'):
+    if(network_class_name == 'InceptionResnetV2Classifier'):
         from sa_networks.inception_resnet_v2_classifier_arch import InceptionResnetV2ClassifierArch;
         cnn_arch = InceptionResnetV2ClassifierArch(n_channels = n_channels, n_classes = n_classes, model_out_path = model_path, model_base_filename = model_base_filename, model_restore_filename = model_restore_filename, cost_func = cost_func \
             , kwargs=network_params \
@@ -161,40 +156,13 @@ if __name__ == "__main__":
         cnn_arch = Resnet152ClassifierArch(n_channels = n_channels, n_classes = n_classes, model_out_path = model_path, model_base_filename = model_base_filename, model_restore_filename = model_restore_filename, cost_func = cost_func \
             , kwargs=network_params \
             );
-    elif(network_class_name == 'Resnet50Classifier'):
-        from sa_networks.resnet_50_classifier_arch import Resnet50ClassifierArch;
-        cnn_arch = Resnet50ClassifierArch(n_channels = n_channels, n_classes = n_classes, model_out_path = model_path, model_base_filename = model_base_filename, model_restore_filename = model_restore_filename, cost_func = cost_func \
-            , kwargs=network_params \
-            );
-    elif(network_class_name == 'Resnet18Classifier'):
-        from sa_networks.resnet_18_classifier_arch import Resnet18ClassifierArch;
-        cnn_arch = Resnet18ClassifierArch(n_channels = n_channels, n_classes = n_classes, model_out_path = model_path, model_base_filename = model_base_filename, model_restore_filename = model_restore_filename, cost_func = cost_func \
-            , kwargs=network_params \
-            );
     else:
         print('error: network class name \'{}\' is not supported by runner'.format(network_class_name));
         sys.exit();  
 
     if(is_test == False):
         if(train_dataprovider_class_name == 'TCGADataProvider'):
-            from sa_data_providers.TCGA_data_provider import TCGADataProvider;
             train_data_provider = TCGADataProvider( \
-                is_test=is_test \
-                , filepath_data = train_filepath_data \
-                , filepath_label = train_filepath_label \
-                , n_channels = n_channels \
-                , n_classes = n_classes \
-                , do_preprocess = train_preprocess \
-                , do_augment = train_augment \
-                , data_var_name = None \
-                , label_var_name = None \
-                , permute = train_permute \
-                , repeat = True \
-                , kwargs = train_params\
-            );
-        elif(train_dataprovider_class_name == 'TCGABatchDataProvider'):
-            from sa_data_providers.TCGA_batch_data_provider import TCGABatchDataProvider;
-            train_data_provider = TCGABatchDataProvider( \
                 is_test=is_test \
                 , filepath_data = train_filepath_data \
                 , filepath_label = train_filepath_label \
@@ -214,24 +182,7 @@ if __name__ == "__main__":
 
         if(has_validation):
             if(validate_dataprovider_class_name == 'TCGADataProvider'):
-                from sa_data_providers.TCGA_data_provider import TCGADataProvider;
                 validate_data_provider = TCGADataProvider( \
-                    is_test=is_test \
-                    , filepath_data = validate_filepath_data \
-                    , filepath_label = validate_filepath_label \
-                    , n_channels = n_channels \
-                    , n_classes = n_classes \
-                    , do_preprocess = validate_preprocess \
-                    , do_augment = validate_augment \
-                    , data_var_name = None \
-                    , label_var_name = None \
-                    , permute = validate_permute \
-                    , repeat = False \
-                    , kwargs = validate_params\
-                ); 
-            elif(validate_dataprovider_class_name == 'TCGABatchDataProvider'):
-                from sa_data_providers.TCGA_batch_data_provider import TCGABatchDataProvider;
-                validate_data_provider = TCGABatchDataProvider( \
                     is_test=is_test \
                     , filepath_data = validate_filepath_data \
                     , filepath_label = validate_filepath_label \
@@ -247,26 +198,8 @@ if __name__ == "__main__":
                 ); 
     else:
         if(test_dataprovider_class_name == 'TCGADataProvider'):
-            from sa_data_providers.TCGA_data_provider import TCGADataProvider;
             ########### to do: should allow list of files
             test_data_provider = TCGADataProvider( \
-                is_test=is_test \
-                , filepath_data = test_filepath_data \
-                , filepath_label = None \
-                , n_channels = n_channels \
-                , n_classes = n_classes \
-                , do_preprocess = test_preprocess \
-                , do_augment = test_augment \
-                , data_var_name = None \
-                , label_var_name = None \
-                , permute = False \
-                , repeat = False \
-                , kwargs = test_params\
-            );
-        elif(test_dataprovider_class_name == 'TCGABatchDataProvider'):
-            from sa_data_providers.TCGA_batch_data_provider import TCGABatchDataProvider;
-            ########### to do: should allow list of files
-            test_data_provider = TCGABatchDataProvider( \
                 is_test=is_test \
                 , filepath_data = test_filepath_data \
                 , filepath_label = None \

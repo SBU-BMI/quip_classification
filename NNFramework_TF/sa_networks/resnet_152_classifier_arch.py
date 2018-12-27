@@ -66,7 +66,7 @@ class Resnet152ClassifierArch(AbstractCNNArch):
         self.accuracy = self.get_accuracy();
 
         variables_to_restore = slim.get_variables_to_restore(exclude=['Variable', 'Variable_1', 'Variable_2', 'Variable_3', \
-            'resnet_v1_152/AuxLogits', 'resnet_v1_152/Logits'])
+            'resnet_v1_152/logits'])
         #print ([v.name for v in variables_to_restore]);
         #self.saver = tf.train.Saver(var_list =variables_to_restore[1:], max_to_keep=100000);
         self.saver_official = tf.train.Saver(var_list =variables_to_restore, max_to_keep=100000);
@@ -125,8 +125,10 @@ class Resnet152ClassifierArch(AbstractCNNArch):
             self.saver.restore(sess, self.filepath);
         print('after restore');
 
-    def save_model(self, sess, optimizer, epoch):
-        postfix = '_epoch_{:04d}'.format(epoch);
+    def save_model(self, sess, optimizer, epoch, suffix=""):
+        postfix = '_epoch_{:04d}'.format(epoch) ;
+        if(suffix is not None):
+            postfix += suffix;
         self.filepath = os.path.join(self.model_out_path, self.model_base_filename+ postfix + '.ckpt');
         print('self.filepath = ', self.filepath);
         self.saver.save(sess, self.filepath);
