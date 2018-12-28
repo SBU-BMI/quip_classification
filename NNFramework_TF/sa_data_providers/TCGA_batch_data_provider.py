@@ -1,7 +1,3 @@
-# author: Shahira Abousamra <shahira.abousamra@stonybrook.edu>
-# created: 12.26.2018 
-# ==============================================================================
-
 from sa_net_data_provider import AbstractDataProvider;
 from numpy import random;
 import glob
@@ -30,11 +26,6 @@ class TCGABatchDataProvider(AbstractDataProvider):
         self.file_name_suffix = args['file_name_suffix'];
         self.pre_resize = bool(strtobool(args['pre_resize']));
         self.do_postprocess = bool(strtobool(args['postprocess']));
-        if(do_augment):
-            self.create_augmentation_map(kwargs);
-        if(self.do_postprocess):
-            self.read_postprocess_parameters(kwargs); 
-        sys.stdout.flush();
         self.is_test = is_test; # note that label will be None when is_test is true
         self.filepath_data = filepath_data;
         if(filepath_label == None or filepath_label.strip() == ''):
@@ -49,6 +40,12 @@ class TCGABatchDataProvider(AbstractDataProvider):
         self.label_var_name = label_var_name;
         self.do_permute = permute;
         self.do_repeat = repeat;
+        if(do_augment):
+            self.create_augmentation_map(kwargs);
+        if(self.do_postprocess):
+            self.read_postprocess_parameters(kwargs); 
+        if(self.do_preprocess):
+            self.read_preprocess_parameters(kwargs); 
 
         self.is_loaded = False;
         self.tmp_index = 0;
@@ -62,14 +59,17 @@ class TCGABatchDataProvider(AbstractDataProvider):
             self.tf_angles = tf.placeholder(dtype=tf.float32, shape=(None,))
             self.tf_post_crop_y1 = tf.placeholder(dtype=tf.int32)
             self.tf_post_crop_x1 = tf.placeholder(dtype=tf.int32)
+            #print('aug_hue = ', self.aug_hue_max/255.0)
 
+            #######  TODO: NOT FROM Configuration - preset
             self.tf_data_points_tmp1 = tf.image.random_flip_left_right(self.tf_data_points);
             self.tf_data_points_tmp2 = tf.image.random_flip_up_down(self.tf_data_points_tmp1);
             self.tf_data_points_tmp3 = tf.contrib.image.rotate(self.tf_data_points_tmp2, self.tf_angles);
-            self.tf_data_points_tmp4 = tf.image.random_brightness(self.tf_data_points_tmp3, float(self.aug_brightness_max));
-            self.tf_data_points_tmp5 = tf.contrib.image.translate(self.tf_data_points_tmp4, self.tf_translations);
-            self.tf_data_points_tmp6 = tf.image.crop_to_bounding_box(self.tf_data_points_tmp5, self.tf_post_crop_y1, self.tf_post_crop_x1, self.post_crop_height, self.post_crop_width);
-            self.tf_data_points_aug = tf.image.resize_images(self.tf_data_points_tmp6, (self.input_img_height, self.input_img_width));
+            self.tf_data_points_tmp4 = tf.image.random_hue(self.tf_data_points_tmp3, self.aug_hue_max/255.0);
+            self.tf_data_points_tmp5 = tf.image.random_brightness(self.tf_data_points_tmp4, float(self.aug_brightness_max));
+            self.tf_data_points_tmp6 = tf.contrib.image.translate(self.tf_data_points_tmp5, self.tf_translations);
+            self.tf_data_points_tmp7 = tf.image.crop_to_bounding_box(self.tf_data_points_tmp6, self.tf_post_crop_y1, self.tf_post_crop_x1, self.post_crop_height, self.post_crop_width);
+            self.tf_data_points_aug = tf.image.resize_images(self.tf_data_points_tmp7, (self.input_img_height, self.input_img_width));
 
         self.tf_data_points_std_in = tf.placeholder(dtype=tf.float32, shape=(None, None, None, None))
         self.tf_data_points_std = tf.map_fn(lambda img:tf.image.per_image_standardization(img), self.tf_data_points_std_in)
@@ -361,6 +361,9 @@ class TCGABatchDataProvider(AbstractDataProvider):
         if(self.do_augment == True):
             #tic1 = time.time();
             data_points, data_labels = self.augment_batch_new3(data_points, data_labels);
+            ## debug
+            #for i in range(0,n):
+            #    io.imsave('/pylon5/ac3uump/shahira/tcga/tmp/'+ str(self.tmp_index) + '_' + str(i)+ '.png',  data_points[i,:,:,:].astype(np.int64));
             #tic2 = time.time();
             #print('time augment = ', tic2 - tic1);
             #sys.stdout.flush()
@@ -372,6 +375,10 @@ class TCGABatchDataProvider(AbstractDataProvider):
         #    print('time postprocess = ', tic2 - tic1);
         #    sys.stdout.flush()
 
+        ## debug
+        #if(not self.do_augment):
+        #    for i in range(0,n):
+        #        io.imsave('/pylon5/ac3uump/shahira/tcga/tmp/'+ str(self.tmp_index) + '_' + str(i)+ '.png',  data_points[i,:,:,:].astype(np.int64));
 
         #tic1 = time.time();
         #data_points = self.run_per_image_standardize(data_points);
@@ -385,20 +392,25 @@ class TCGABatchDataProvider(AbstractDataProvider):
     def preprocess(self, data_point, label):
         data_point2 = data_point;
 
-        if(not(data_point.shape[0] == self.input_img_height) or not(data_point.shape[1] == self.input_img_width)):
-            ##debug
-            #print('before resize: ', data_point2.shape);
+        if(self.pre_crop_center):
+            starty = (data_point2.shape[0] - self.pre_crop_height)//2;
+            startx = (data_point2.shape[1] - self.pre_crop_width)//2;
+            endy = starty + self.pre_crop_height;
+            endx = startx + self.pre_crop_width;
+            data_point2 = data_point2[starty:endy, startx:endx, :];
+        if(not(data_point2.shape[0] == self.input_img_height) or not(data_point2.shape[1] == self.input_img_width)):
             if(self.pre_resize):
-                data_point2 = sktransform.resize(data_point, (self.input_img_height, self.input_img_width), preserve_range=True, anti_aliasing=True).astype(np.uint8);
+                data_point2 = sktransform.resize(data_point2, (self.input_img_height, self.input_img_width), preserve_range=True, anti_aliasing=True).astype(np.uint8);
                 #data_point2 = tf.image.resize_images(data_point2, [self.input_img_height, self.input_img_width]);
-        #    elif(self.pre_center):
-        #        diff_y = self.input_img_height - data_point.shape[0];
-        #        diff_x = self.input_img_width - data_point.shape[1];
-        #        diff_y_div2 = diff_y//2;
-        #        diff_x_div2 = diff_x//2;
-        #        data_point2 = np.zeros((self.input_img_height, self.input_img_width, data_point.shape[2]));
-        #        if(diff_y >= 0 and diff_x >= 0):
-        #            data_point2[diff_y:diff_y+self.input_img_height, diff_x:diff_x+self.input_img_width, :] = data_point;
+            elif(self.pre_center):
+                diff_y = self.input_img_height - data_point2.shape[0];
+                diff_x = self.input_img_width - data_point2.shape[1];
+                diff_y_div2 = diff_y//2;
+                diff_x_div2 = diff_x//2;
+                data_point_tmp = np.zeros((self.input_img_height, self.input_img_width, data_point2.shape[2]));
+                if(diff_y >= 0 and diff_x >= 0):
+                    data_point_tmp[diff_y:diff_y+self.input_img_height, diff_x:diff_x+self.input_img_width, :] = data_point2;
+                    data_point2 = data_point_tmp;
             ##debug
             #print('after resize: ', data_point2.shape);
         return data_point2, label;
@@ -455,7 +467,7 @@ class TCGABatchDataProvider(AbstractDataProvider):
         #key, value = reader.read(filename_queue)
 
         #img = tf.image.decode_png(value) # use png or jpg decoder based on your files.
-
+        #print('filepath=', filepath)
         img = io.imread(filepath);
         if(img.shape[2] > 3): # remove the alpha
             img = img[:,:,0:3];
@@ -873,6 +885,20 @@ class TCGABatchDataProvider(AbstractDataProvider):
             self.post_crop_y1 = None;
             self.post_crop_x1 = None;
 
+    def read_preprocess_parameters(self, kwargs={}):
+        args = {'pre_resize': 'False', 'pre_crop_center': 'False',
+            'pre_crop_height': 128, 'pre_crop_width': 128
+            };
+        #print(args);
+        args.update(kwargs);    
+        #print(args);
+        self.pre_resize = bool(strtobool(args['pre_resize']));
+        self.pre_crop_center = bool(strtobool(args['pre_crop_center']));
+        if(self.pre_crop_center ):
+            self.pre_crop_height = int(args['pre_crop_height']);
+            self.pre_crop_width = int(args['pre_crop_width']);
+            self.pre_crop_y1 = None;
+            self.pre_crop_x1 = None;
 
     def postprocess(self, data_point, label):
         data_point2 = data_point.copy();

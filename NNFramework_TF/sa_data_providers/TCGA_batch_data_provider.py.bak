@@ -1,3 +1,7 @@
+# author: Shahira Abousamra <shahira.abousamra@stonybrook.edu>
+# created: 12.26.2018 
+# ==============================================================================
+
 from sa_net_data_provider import AbstractDataProvider;
 from numpy import random;
 import glob
@@ -59,6 +63,7 @@ class TCGABatchDataProvider(AbstractDataProvider):
             self.tf_post_crop_y1 = tf.placeholder(dtype=tf.int32)
             self.tf_post_crop_x1 = tf.placeholder(dtype=tf.int32)
 
+            #######  TODO: NOT FROM Configuration - preset
             self.tf_data_points_tmp1 = tf.image.random_flip_left_right(self.tf_data_points);
             self.tf_data_points_tmp2 = tf.image.random_flip_up_down(self.tf_data_points_tmp1);
             self.tf_data_points_tmp3 = tf.contrib.image.rotate(self.tf_data_points_tmp2, self.tf_angles);

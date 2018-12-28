@@ -13,6 +13,7 @@ from sa_net_optimizer import OptimizerTypes, CNNOptimizer;
 from sa_net_data_provider import AbstractDataProvider;
 import sys 
 import time
+import pickle
 
 class ClassifierTrainer(CNNTrainer):
     def __init__(self, cnn_arch:AbstractCNNArch, train_data_provider:AbstractDataProvider, validate_data_provider:AbstractDataProvider, optimizer_type, session_config, kwargs):
@@ -69,7 +70,11 @@ class ClassifierTrainer(CNNTrainer):
         best_validation_accuracy = 0;
         best_train_val_avg_accuracy = 0;
         current_validation_accuracy = None;
-        current_train_val_avg_accuracy = None;    
+        current_train_val_avg_accuracy = None;   
+        total_cost = 0;
+        total_correct_count = 0;
+        total_count = 0;
+        step_start_num = 0; 
 
         with tf.Session(config=self.session_config) as sess:
             with sess.as_default():
@@ -83,6 +88,7 @@ class ClassifierTrainer(CNNTrainer):
                     #print('after restore');
                     if(self.subepoch_checkpoint_step > 0):
                         self.train_data_provider.restore_state(self.cnn_arch.model_restore_filename);
+                        step_start_num, total_cost, total_correct_count, total_count = self.restore_state(self.cnn_arch.model_restore_filename);
                 counter = 0;
                 #while(True):
                 #    counter +=1;
@@ -90,12 +96,11 @@ class ClassifierTrainer(CNNTrainer):
                 #        print(counter);
 
                 for epoch in range(epoch_start_num, self.max_epochs):
-                    total_cost = 0;
-                    total_correct_count = 0;
-                    total_count = 0;
-                    for step in range(0, self.epoch_size):
+                    for step in range(step_start_num, self.epoch_size):
                         #tic1 = time.time();
                         batch_x, batch_label = self.train_data_provider.get_next_n(self.batch_size);
+                        if(batch_x is None):
+                            break;
                         #print('batch size = ', batch_x.eval().shape[0]);
                         #print('label size = ', batch_label.eval().shape[0]);
                         #tic2 = time.time();
@@ -133,9 +138,10 @@ class ClassifierTrainer(CNNTrainer):
 
                         if(self.subepoch_checkpoint_step > 0 and step > 0 and step % self.subepoch_checkpoint_step == 0):
                             new_saved_subepoch_model_filename = self.cnn_arch.save_model(sess, self.optimizer, epoch, suffix="_step=_{:06d}".format(step));
+                            self.train_data_provider.save_state(new_saved_subepoch_model_filename);
+                            self.save_state(new_saved_subepoch_model_filename, step, total_cost, total_correct_count, total_count);
                             self.delete_model_files(last_saved_subepoch_model_filename);
                             last_saved_subepoch_model_filename = new_saved_subepoch_model_filename;
-                            self.train_data_provider.save_state(last_saved_subepoch_model_filename);
 
                                                     
 
@@ -216,6 +222,12 @@ class ClassifierTrainer(CNNTrainer):
                         self.train_data_provider.reset(repermute=True);
                         if(self.epoch_size_config < 0):
                             self.epoch_size = round(self.train_data_provider.data_count / float(self.batch_size) + 0.5);
+
+
+                    total_cost = 0;
+                    total_correct_count = 0;
+                    total_count = 0;
+                    step_start_num = 0; 
 
                 print("Optimization Finished!")
 
@@ -303,7 +315,31 @@ class ClassifierTrainer(CNNTrainer):
     def delete_model_files(self, filepath):
         if(filepath is None):
             return;
+        filepath, _ = os.path.splitext(filepath);
+        print('delete_model_files = ', filepath)
         file_pattern = filepath + '*';
         files = glob.glob(file_pattern);
         for file in files: 
+            print(file);
             os.remove(file);
+
+
+    def save_state(self, checkpoint_filepath, step, total_cost, total_correct_count, total_count):
+        if(checkpoint_filepath is None):
+            return;
+        base_filename,_ = os.path.splitext(checkpoint_filepath);
+        filepath_param = base_filename + '_train_out_params.pkl' ;
+        pickle.dump([step, total_cost, total_correct_count, total_count], open(filepath_param, 'wb'));
+
+    def restore_state(self, checkpoint_filepath):
+        if(checkpoint_filepath is None):
+            return;
+        base_filename,_ = os.path.splitext(checkpoint_filepath);
+        filepath_param = base_filename + '_train_out_params.pkl' ;
+        if(os.path.isfile(filepath_param)):            
+            step, total_cost, total_correct_count, total_count = pickle.load(open(filepath_param, 'rb'));
+        else:
+            step, total_cost, total_correct_count, total_count = 0, 0, 0, 0;
+
+        print('step, total_cost, total_correct_count, total_count = ', step, total_cost, total_correct_count, total_count);
+        return step, total_cost, total_correct_count, total_count;
