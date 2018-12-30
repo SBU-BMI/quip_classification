@@ -15,15 +15,15 @@ def extract_rand_patch(svs_path, pat_xys):
     else:
         mag = 10.0 / float(0.254)
 
-    pw = pw_20X * mag / 20.0
-    pw3 = int(pw * 3.0)
-    pw3_20X = int(pw_20X * 3.0)
+    pw = int(pw_20X * mag / 20)
+    pw3 = pw * 3
+    pw3_20X = pw_20X * 3
     width = oslide.dimensions[0]
     height = oslide.dimensions[1]
 
     for pat_x, pat_y in pat_xys:
-        x = int(1 + pw * pat_x - pw)
-        y = int(1 + pw * pat_y - pw)
+        x = 1 + pw * pat_x - pw
+        y = 1 + pw * pat_y - pw
         if x <= 0 or y <= 0 or x + pw3 >= width or y + pw3 >= height:
             print('Patch extracting out of range {}/{} {}/{} {}/{}'.format(x, y, pat_x, pat_y, width, height))
             continue
