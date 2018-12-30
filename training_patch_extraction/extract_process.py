@@ -15,7 +15,7 @@ def extract_rand_patch(svs_path, pat_xys):
     else:
         mag = 10.0 / float(0.254)
 
-    pw = int(pw_20X * mag / 20)
+    pw = float(int(10 * pw_20X * mag / 20)) / 10.0
     pw3 = pw * 3
     pw3_20X = pw_20X * 3
     width = oslide.dimensions[0]
