@@ -1,6 +1,8 @@
 # Patch extraction
 
-This software extracts *semi-automatically* labeled training patches for Tumor Infiltrating Lymphocyte (TIL) classification. Assuming that you want to run this software on bridges AI, instructions are as follows:  
+This software extracts *semi-automatically labeled* training patches for Tumor Infiltrating Lymphocyte (TIL) classification. Manually labeled training patches can be downloaded at:  
+
+Assuming that you want to run this software on bridges AI, instructions are as follows:  
 
 First, build a singularity image with openslide according to build_singularity.sh. You have to do this on a machine with sudo privilege.  
 Then download WSIs using list_wsi_on_gcloud_download.sh.  
