@@ -1,6 +1,15 @@
 #!/bin/bash
 
+# If you want to run 1 downloading thread:
+# bash ${this_file} 0 1
+# If you want to run 3 parallel downloading threads:
+# bash ${this_file} 0 3
+# bash ${this_file} 1 3
+# bash ${this_file} 2 3
+
+# What is my parallelization ID code
 PAR_CODE=$1
+# How many parallel downloading processes
 PAR_MAX=$2
 
 N=0
