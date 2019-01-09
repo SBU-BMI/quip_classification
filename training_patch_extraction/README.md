@@ -6,13 +6,14 @@ http://vision.cs.stonybrook.edu/~lehhou/download/lym_cnn_training_data_formated.
 Assuming that you want to run this software on bridges AI, instructions are as follows:  
 
 First, build a singularity image with openslide according to build_singularity.sh. You have to do this on a machine with sudo privilege.  
+
 Then, download WSIs using list_wsi_on_gcloud_download.sh. Skip this step if you have WSIs already.  
+
 Then, download the semi-automatically generated Tumor Infiltrating Lymphocyte (TIL) maps in the following link. Skip this step if you have the TIL maps already.  
-https://stonybrookmedicine.app.box.com/s/ecr7ba8czvqygw90iym0hwpnprrofoas  
+https://stonybrookmedicine.app.box.com/s/ecr7ba8czvqygw90iym0hwpnprrofoas (download til-maps.zip)
 
 Finally run patch extraction with:  
-sbatch extract_process_submit_jobs.sh
-
+sbatch extract_process_submit_jobs.sh  
 The command above submit a job for running extract_process.py. Please check out the comments in extract_process.py.
 
 ## Format of training data
