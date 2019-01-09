@@ -1,6 +1,7 @@
 # Patch extraction
 
-This software extracts *semi-automatically labeled* training patches for Tumor Infiltrating Lymphocyte (TIL) classification. Manually labeled training patches can be downloaded at:  
+This software extracts *semi-automatically labeled* training patches for Tumor Infiltrating Lymphocyte (TIL) classification.
+For completeness, *Manually labeled* training patches can be downloaded at:  
 http://vision.cs.stonybrook.edu/~lehhou/download/lym_cnn_training_data_formated.zip
 
 Assuming that you want to run this software on bridges AI, instructions are as follows:  
