@@ -1,6 +1,3 @@
-# author: Shahira Abousamra <shahira.abousamra@stonybrook.edu>
-# created: 12.23.2018 
-# ==============================================================================
 import sys;
 import os;
 import tensorflow as tf;
@@ -171,6 +168,11 @@ if __name__ == "__main__":
         cnn_arch = Resnet18ClassifierArch(n_channels = n_channels, n_classes = n_classes, model_out_path = model_path, model_base_filename = model_base_filename, model_restore_filename = model_restore_filename, cost_func = cost_func \
             , kwargs=network_params \
             );
+    elif(network_class_name == 'VGG16Classifier'):
+        from sa_networks.vgg_16_classifier_arch import VGG16ClassifierArch;
+        cnn_arch = VGG16ClassifierArch(n_channels = n_channels, n_classes = n_classes, model_out_path = model_path, model_base_filename = model_base_filename, model_restore_filename = model_restore_filename, cost_func = cost_func \
+            , kwargs=network_params \
+            );
     else:
         print('error: network class name \'{}\' is not supported by runner'.format(network_class_name));
         sys.exit();  
@@ -195,6 +197,22 @@ if __name__ == "__main__":
         elif(train_dataprovider_class_name == 'TCGABatchDataProvider'):
             from sa_data_providers.TCGA_batch_data_provider import TCGABatchDataProvider;
             train_data_provider = TCGABatchDataProvider( \
+                is_test=is_test \
+                , filepath_data = train_filepath_data \
+                , filepath_label = train_filepath_label \
+                , n_channels = n_channels \
+                , n_classes = n_classes \
+                , do_preprocess = train_preprocess \
+                , do_augment = train_augment \
+                , data_var_name = None \
+                , label_var_name = None \
+                , permute = train_permute \
+                , repeat = True \
+                , kwargs = train_params\
+            );
+        elif(train_dataprovider_class_name == 'TCGABatchEqualDataProvider'):
+            from sa_data_providers.TCGA_batch_equal_data_provider import TCGABatchEqualDataProvider;
+            train_data_provider = TCGABatchEqualDataProvider( \
                 is_test=is_test \
                 , filepath_data = train_filepath_data \
                 , filepath_label = train_filepath_label \
@@ -300,12 +318,32 @@ if __name__ == "__main__":
     if(is_test == False):
         if(trainer_optimizer_type == 'ADAM'):
             optimizer_type=OptimizerTypes.ADAM;
+        elif(trainer_optimizer_type == 'SGD'):
+            optimizer_type=OptimizerTypes.SGD;
         else:
             print('error: trainer optimizer type \'{}\' is not supported by runner'.format(trainer_class_name));
             sys.exit();        
     
         if(trainer_class_name == 'ClassifierTrainer'):
             trainer = ClassifierTrainer(cnn_arch \
+                , train_data_provider \
+                , validate_data_provider \
+                , optimizer_type=optimizer_type \
+                , session_config=session_config \
+                , kwargs = trainer_params \
+            );
+        elif(trainer_class_name == 'ClassifierTrainerOpt'):
+            from sa_trainers.sa_net_train_opt_classifier import ClassifierTrainerOpt;
+            trainer = ClassifierTrainerOpt(cnn_arch \
+                , train_data_provider \
+                , validate_data_provider \
+                , optimizer_type=optimizer_type \
+                , session_config=session_config \
+                , kwargs = trainer_params \
+            );
+        elif(trainer_class_name == 'ClassifierTrainerMultiGPU'):
+            from sa_trainers.sa_net_train_multi_gpu_classifier import ClassifierTrainerMultiGPU;
+            trainer = ClassifierTrainerMultiGPU(cnn_arch \
                 , train_data_provider \
                 , validate_data_provider \
                 , optimizer_type=optimizer_type \

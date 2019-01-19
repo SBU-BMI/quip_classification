@@ -6,9 +6,9 @@ import os;
 import tensorflow as tf;
 import numpy as np;
 
-from sa_net_arch_utilities import CNNArchUtils;
+from .sa_net_arch_utilities import CNNArchUtils;
 #from sa_net_loss_func import CNNLossFuncHelper, CostFuncTypes;
-from sa_net_cost_func import AbstractCostFunc;
+from .sa_net_cost_func import AbstractCostFunc;
 
 class AbstractCNNArch:
     def __init__(self, n_channels, n_classes, model_out_path, model_base_filename, cost_func:AbstractCostFunc, kwargs):

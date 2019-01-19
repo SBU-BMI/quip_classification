@@ -225,7 +225,7 @@ class TCGABatchDataProvider(AbstractDataProvider):
         if(labels_list is not None):
             data_labels = tf.stack(labels_list);
             #data_labels = np.stack(labels_list);
-        print('data_points =' + str(np.shape(data_points)))
+        #print('data_points =' + str(np.shape(data_points)))
         sys.stdout.flush();
 
         if(self.do_augment == True):
@@ -239,7 +239,7 @@ class TCGABatchDataProvider(AbstractDataProvider):
         return data_points, data_labels;
 
     def get_next_n_old2(self, n:int):
-        print('self.last_fetched_indx = ', self.last_fetched_indx);
+        #print('self.last_fetched_indx = ', self.last_fetched_indx);
         ## validate parameters
         if(n <= 0):
             return None, None;
@@ -291,7 +291,7 @@ class TCGABatchDataProvider(AbstractDataProvider):
         #if(labels_list is not None):
         #    #data_labels = tf.stack(labels_list);
         #    data_labels = np.stack(labels_list);
-        print('data_points =' + str(np.shape(data_points)))
+        #print('data_points =' + str(np.shape(data_points)))
         sys.stdout.flush();
 
         if(self.do_augment == True):
@@ -305,7 +305,7 @@ class TCGABatchDataProvider(AbstractDataProvider):
         return data_points, data_labels;
 
     def get_next_n(self, n:int):
-        print('self.last_fetched_indx = ', self.last_fetched_indx);
+        #print('self.last_fetched_indx = ', self.last_fetched_indx);
         ## validate parameters
         if(n <= 0):
             return None, None;
@@ -380,12 +380,20 @@ class TCGABatchDataProvider(AbstractDataProvider):
         #    for i in range(0,n):
         #        io.imsave('/pylon5/ac3uump/shahira/tcga/tmp/'+ str(self.tmp_index) + '_' + str(i)+ '.png',  data_points[i,:,:,:].astype(np.int64));
 
-        #tic1 = time.time();
-        #data_points = self.run_per_image_standardize(data_points);
-        data_points = self.tf_data_points_std.eval(feed_dict={self.tf_data_points_std_in: data_points})
-        #tic2 = time.time();
-        #print('time standardize = ', tic2 - tic1);
-        #sys.stdout.flush()
+        #### standardize
+        ##tic1 = time.time();
+        ##data_points = self.run_per_image_standardize(data_points);
+        #data_points = self.tf_data_points_std.eval(feed_dict={self.tf_data_points_std_in: data_points})
+        ##tic2 = time.time();
+        ##print('time standardize = ', tic2 - tic1);
+        ##sys.stdout.flush()
+
+        #### Norm with mean = 0 and std = 2
+        np.clip(data_points, 0, 255, data_points);
+        data_points /= 255;
+        data_points -= 0.5;
+        data_points *= 2;
+
 
         return data_points, data_labels;
 

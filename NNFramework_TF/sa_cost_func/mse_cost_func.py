@@ -6,9 +6,9 @@ import os;
 import tensorflow as tf;
 import numpy as np;
 
-from sa_net_cost_func import AbstractCostFunc;
-from sa_net_loss_func_helper import CNNLossFuncHelper;
-from sa_net_arch_utilities import CNNArchUtils;
+from ..sa_net_cost_func import AbstractCostFunc;
+from ..sa_net_loss_func_helper import CNNLossFuncHelper;
+from ..sa_net_arch_utilities import CNNArchUtils;
 
 class MSECost(AbstractCostFunc):
     def __init__(self, n_classes, kwargs):

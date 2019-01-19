@@ -84,13 +84,11 @@ class Resnet18ClassifierArch(AbstractCNNArch):
         keep_prob = dropout;
 
 
-        with slim.arg_scope(resnet_arg_scope()):
-            logits, end_points = resnet_v1_18(input_x, num_classes=self.n_classes, is_training=isTraining)
-        #with slim.arg_scope(inception_v3_arg_scope()):
-        #    logits, end_points = inception_v3(input_x, num_classes=self.n_classes, is_training=isTraining)
-        #with slim.arg_scope(inception_v3_arg_scope()):
-        #    logits, end_points = resnet_v1_50(input_x, num_classes=self.n_classes, is_training=isTraining)
+        #with slim.arg_scope(resnet_arg_scope()):
+        #    logits, end_points = resnet_v1_18(input_x, num_classes=self.n_classes, is_training=isTraining)
 
+        with slim.arg_scope(resnet_arg_scope(use_batch_norm=False, weight_decay=0.0005)):
+            logits, end_points = resnet_v1_18(input_x, num_classes=self.n_classes, is_training=isTraining)
     
                 
         return logits, end_points;

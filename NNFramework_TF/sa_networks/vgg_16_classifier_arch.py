@@ -1,6 +1,3 @@
-# author: Shahira Abousamra <shahira.abousamra@stonybrook.edu>
-# created: 12.23.2018 
-# ==============================================================================
 import sys;
 import os;
 import tensorflow as tf;
@@ -19,15 +16,15 @@ import sys;
 #from nets.inception_resnet_v2 import inception_resnet_v2
 #from nets.inception_resnet_v2 import inception_resnet_v2_arg_scope
 #from nets.inception_resnet_v2 import inception_resnet_v2_base
-#from sa_networks.inception_resnet_v2 import inception_v2
+#from sa_networks.inception_resnet_v2 import inception_resnet_v2
 #from sa_networks.inception_resnet_v2 import inception_resnet_v2_arg_scope
 #from sa_networks.inception_resnet_v2 import inception_resnet_v2_base
-from .inception_v4 import inception_v4
-from .inception_v4 import inception_v4_arg_scope
-#from sa_networks.resnet_v1 import resnet_v1_50
-#from sa_networks.resnet_v1 import resnet_arg_scope
+#from sa_networks.inception_v3 import inception_v3
+#from sa_networks.inception_v3 import inception_v3_arg_scope
+from ..sa_networks.vgg import vgg_16
+from ..sa_networks.vgg import vgg_arg_scope
 
-class InceptionV4ClassifierArch(AbstractCNNArch):
+class VGG16ClassifierArch(AbstractCNNArch):
     def __init__(self, n_channels, n_classes, model_out_path, model_base_filename, model_restore_filename, cost_func:AbstractCostFunc, kwargs):
         args = {'input_img_width':-1, 'input_img_height':-1, 'pretrained':False, 'freeze_layers':-1, 'extra_end_layer':-1, 
             'get_features': 'False', 'official_checkpoint':'False'};
@@ -66,20 +63,10 @@ class InceptionV4ClassifierArch(AbstractCNNArch):
         self.accuracy = self.get_accuracy();
 
         variables_to_restore = slim.get_variables_to_restore(exclude=['Variable', 'Variable_1', 'Variable_2', 'Variable_3', \
-            'InceptionV4/AuxLogits', 'InceptionV4/Logits'
-            #, 'InceptionV4/Conv2d_1a_3x3/biases', 'InceptionV4/Conv2d_2a_3x3/biases', 'InceptionV4/Conv2d_2b_3x3/biases', 'InceptionV4/Mixed_3a/Branch_1/Conv2d_0a_3x3/biases'
-                ])
-        #print(type(variables_to_restore));
-        variables_to_restore2 = [];
-        for v in variables_to_restore:
-            #print(v.name);
-            if('biases' not in v.name):
-                variables_to_restore2.append(v);
-        #for v in variables_to_restore2:
-        #    print(v.name);
+            'vgg_16/fc8'])
         #print ([v.name for v in variables_to_restore]);
         #self.saver = tf.train.Saver(var_list =variables_to_restore[1:], max_to_keep=100000);
-        self.saver_official = tf.train.Saver(var_list =variables_to_restore2, max_to_keep=100000);
+        self.saver_official = tf.train.Saver(var_list =variables_to_restore, max_to_keep=100000);
         self.saver = tf.train.Saver(max_to_keep=100000);
 
     def create_model(self, input_x, isTraining, kwargs):
@@ -94,13 +81,8 @@ class InceptionV4ClassifierArch(AbstractCNNArch):
         keep_prob = dropout;
 
 
-        #with slim.arg_scope(inception_v4_arg_scope()):
-        #    logits, end_points = inception_v4(input_x, num_classes=self.n_classes, is_training=isTraining)
-        with slim.arg_scope(inception_v4_arg_scope(use_batch_norm=False, weight_decay=0.0005)):
-            logits, end_points = inception_v4(input_x, num_classes=self.n_classes, is_training=isTraining, dropout_keep_prob=keep_prob)
-        #with slim.arg_scope(inception_v4_arg_scope(use_batch_norm=False, weight_decay=0.0005)):
-        #    logits, end_points = inception_v4(input_x, num_classes=self.n_classes, is_training=isTraining, dropout_keep_prob=keep_prob)
-
+        with slim.arg_scope(vgg_arg_scope()):
+            logits, end_points = vgg_16(input_x, num_classes=self.n_classes, is_training=isTraining, dropout_keep_prob=keep_prob)
         #with slim.arg_scope(inception_v3_arg_scope()):
         #    logits, end_points = inception_v3(input_x, num_classes=self.n_classes, is_training=isTraining)
         #with slim.arg_scope(inception_v3_arg_scope()):
@@ -136,6 +118,7 @@ class InceptionV4ClassifierArch(AbstractCNNArch):
 
         if(self.official_checkpoint):
             self.saver_official.restore(sess, self.filepath);
+            self.official_checkpoint = False;
         else:
             print('restore filepath = ', self.filepath );
             self.saver.restore(sess, self.filepath);

@@ -14,6 +14,7 @@ from sa_net_data_provider import AbstractDataProvider;
 import sys 
 import time
 import pickle
+import numpy as np
 
 class ClassifierTrainer(CNNTrainer):
     def __init__(self, cnn_arch:AbstractCNNArch, train_data_provider:AbstractDataProvider, validate_data_provider:AbstractDataProvider, optimizer_type, session_config, kwargs):
@@ -47,6 +48,8 @@ class ClassifierTrainer(CNNTrainer):
         self.init = tf.global_variables_initializer();
         if(self.optimizer_type == OptimizerTypes.ADAM):
             self.optimizer = CNNOptimizer.adam_optimizer(self.learning_rate, self.cnn_arch.cost, self.global_step);
+        elif(self.optimizer_type == OptimizerTypes.SGD):
+            self.optimizer = CNNOptimizer.sgd_optimizer(self.learning_rate, self.cnn_arch.cost, self.global_step);
         self.epoch_out_filename = os.path.join(self.cnn_arch.model_out_path, self.cnn_arch.model_base_filename + '_train_epoch_out.txt');
         self.minibatch_out_filename = os.path.join(self.cnn_arch.model_out_path, self.cnn_arch.model_base_filename + '_train_minibatch_out.txt');
 
@@ -96,16 +99,25 @@ class ClassifierTrainer(CNNTrainer):
                 #        print(counter);
 
                 for epoch in range(epoch_start_num, self.max_epochs):
+                    t_sum = [0 for c in range(self.cnn_arch.n_classes)]
+                    f_sum = [0 for c in range(self.cnn_arch.n_classes)]
                     for step in range(step_start_num, self.epoch_size):
                         #tic1 = time.time();
                         batch_x, batch_label = self.train_data_provider.get_next_n(self.batch_size);
                         if(batch_x is None):
                             break;
+                        #print('batch_x.dtype = ', batch_x.dtype)
+                        #print('min batch_x= ', np.amin(batch_x))
+                        #print('max batch_x= ', np.amax(batch_x))
                         #print('batch size = ', batch_x.eval().shape[0]);
                         #print('label size = ', batch_label.eval().shape[0]);
                         #tic2 = time.time();
                         #print('time data = ', tic2 - tic1);
-                        sys.stdout.flush()
+                        #print('batch_label.sum');
+                        #print(batch_label.sum(axis=0))
+                        #print('batch_label');
+                        #print(batch_label)
+                        #sys.stdout.flush()
                         #opt, cost, correct_pred  = sess.run([self.optimizer, self.cnn_arch.cost, self.cnn_arch.correct_pred] \
                         #        , feed_dict={self.cnn_arch.input_x: batch_x.eval() \
                         #        , self.cnn_arch.labels: batch_label.eval() \
@@ -132,6 +144,14 @@ class ClassifierTrainer(CNNTrainer):
                         total_correct_count += batch_correct_count;
                         total_count += batch_count;
 
+                        l = np.argmax(batch_label, axis = 1);
+                        #print('correct_pred.shape', correct_pred.shape)
+                        for c in range(batch_label.shape[1]):            
+                            t = np.logical_and(l == c, correct_pred == True);
+                            f = np.logical_and(l == c, correct_pred == False);
+                            t_sum[c] += t.astype(int).sum();
+                            f_sum[c] += f.astype(int).sum();
+
                         if step % self.display_step == 0:
                             #self.output_minibatch_info(epoch, cost)
                             self.output_minibatch_info(epoch, step, cost, batch_correct_count, batch_count)
@@ -143,13 +163,13 @@ class ClassifierTrainer(CNNTrainer):
                             self.delete_model_files(last_saved_subepoch_model_filename);
                             last_saved_subepoch_model_filename = new_saved_subepoch_model_filename;
 
-                                                    
 
                     print('mean loss = ', total_cost/float(total_count))
-                    print('accuracy = ', batch_correct_count.sum()/float(total_count))
+                    print('accuracy = ', total_correct_count/float(total_count))
 
                     #self.output_epoch_info(epoch, total_cost);
                     self.output_epoch_info(epoch, total_cost, self.epoch_size, total_correct_count, total_count);
+                    self.output_epoch_info_per_class(t_sum, f_sum);
                     current_train_accuracy = total_correct_count / float(total_count);
                         
                     
@@ -169,6 +189,8 @@ class ClassifierTrainer(CNNTrainer):
                         validate_total_loss = 0;
                         validate_correct_count = 0;
                         validate_count = 0;
+                        t_sum = [0 for c in range(self.cnn_arch.n_classes)]
+                        f_sum = [0 for c in range(self.cnn_arch.n_classes)]
                         for validate_step in range(0, self.validate_epoch_size):
                             validate_batch_x, validate_batch_label = self.validate_data_provider.get_next_n(self.batch_size);
                             if(validate_batch_x is None):
@@ -184,16 +206,25 @@ class ClassifierTrainer(CNNTrainer):
                                 , feed_dict={self.cnn_arch.input_x: validate_batch_x \
                                 , self.cnn_arch.labels: validate_batch_label \
                                 , self.cnn_arch.isTest: True \
+                                , self.cnn_arch.isTraining: False \
                             });
                             validate_count += validate_batch_label.shape[0];
 
                             validate_total_loss += cost;
                             validate_correct_count += correct_pred.sum();
+
+                            l = np.argmax(validate_batch_label, axis = 1);
+                            for c in range(validate_batch_label.shape[1]):
+                                t = np.logical_and(l == c, correct_pred == True);
+                                f = np.logical_and(l == c, correct_pred == False);
+                                t_sum[c] += t.astype(int).sum();
+                                f_sum[c] += f.astype(int).sum();
                             #break;
 
                         current_validation_accuracy = validate_correct_count / float(validate_count);
                         current_train_val_avg_accuracy = (current_train_accuracy + current_validation_accuracy)/2.0;
                         self.output_epoch_info(epoch, validate_total_loss, self.validate_epoch_size, validate_correct_count, validate_count);                        
+                        self.output_epoch_info_per_class(t_sum, f_sum);
                         #self.output_epoch_info(epoch, validate_total_loss, self.validate_epoch_size, validate_correct_count, validate_count);                        
                         #print('validation_accuracy = ', current_validation_accuracy);
 
@@ -292,6 +323,17 @@ class ClassifierTrainer(CNNTrainer):
             , self.minibatch_out_filename
         );
 
+    def output_epoch_info_per_class(self, t_sum, f_sum):
+        for c in range(len(t_sum)):
+            print('class ', c, ': Correct = ', t_sum[c], ' Wrong = ', f_sum[c], '\r\n' );
+            self.write_to_filename('class ' + str(c) + ': Correct = ' + str(t_sum[c]) + ' Wrong = ' + str(f_sum[c]) \
+                , self.epoch_out_filename
+            );
+            self.write_to_filename('class ' + str(c) + ': Correct = ' + str(t_sum[c]) + ' Wrong = ' + str(f_sum[c]) \
+                , self.minibatch_out_filename
+            );
+        sys.stdout.flush()
+
     def write_to_file(self, text, filewriter):
         filewriter.write('\r\n');
         filewriter.write(text);
@@ -333,7 +375,7 @@ class ClassifierTrainer(CNNTrainer):
 
     def restore_state(self, checkpoint_filepath):
         if(checkpoint_filepath is None):
-            return;
+            return 0, 0, 0, 0;
         base_filename,_ = os.path.splitext(checkpoint_filepath);
         filepath_param = base_filename + '_train_out_params.pkl' ;
         if(os.path.isfile(filepath_param)):            
