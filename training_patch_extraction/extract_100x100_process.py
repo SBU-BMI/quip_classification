@@ -32,21 +32,19 @@ def extract_rand_patch(svs_path, pat_xys):
         mag = 10.0 / float(0.254)
 
     pw = float(int(10 * pw_20X * mag / 20)) / 10.0
-    pw3 = int(pw * 3)
-    pw3_20X = int(pw_20X * 3)
     width = oslide.dimensions[0]
     height = oslide.dimensions[1]
 
     for pat_x, pat_y in pat_xys:
-        x = int(1 + pw * pat_x - pw)
-        y = int(1 + pw * pat_y - pw)
-        if x <= 0 or y <= 0 or x + pw3 >= width or y + pw3 >= height:
+        x = int(1 + pw * pat_x)
+        y = int(1 + pw * pat_y)
+        if x <= 0 or y <= 0 or x + int(pw) >= width or y + int(pw) >= height:
             print('Patch extracting out of range {}/{} {}/{} {}/{}'.format(
                 x, y, pat_x, pat_y, width, height))
             continue
-        patch = oslide.read_region((x, y), 0, (pw3, pw3))
-        patch = patch.resize((pw3_20X, pw3_20X), Image.ANTIALIAS)
-        yield patch, x, y, pat_x, pat_y, pw3
+        patch = oslide.read_region((x, y), 0, (int(pw), int(pw)))
+        patch = patch.resize((pw_20X, pw_20X), Image.ANTIALIAS)
+        yield patch, x, y, pat_x, pat_y, int(pw)
 
 ###################################
 ## main
@@ -100,10 +98,10 @@ for key, value in wsi_dict_items:
         os.makedirs(output_dir)
 
     try:
-        for patch, x, y, pat_x, pat_y, pw3 in extract_rand_patch(svs_path, pat_xys):
+        for patch, x, y, pat_x, pat_y, pw in extract_rand_patch(svs_path, pat_xys):
             label = int(til_im[pat_y, pat_x, 0] > 1)
             save_name = '{}_{}_{}_{}_{}_{}_{}.png'.format(
-                    svs_name, x, y, pat_x, pat_y, pw3, label)
+                    svs_name, x, y, pat_x, pat_y, pw, label)
             patch.save(os.path.join(output_dir, save_name))
     except:
         print('Error in {}: exception caught'.format(svs_path))
