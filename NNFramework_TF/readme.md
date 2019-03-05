@@ -38,7 +38,7 @@ set other training configuration values according to user preference, like batch
 
 ### Customization:
 To create different classes such as for CNN architecture, dataprovider, trainer, or tester they should be supported by the runner file used to execute the training.  
-Current supported runner file is: *tf-classifier_runner.py*  
+Current supported runner file is: *tf_classifier_runner.py*  
 
 ### Libraries used:
 * Python 3.5 
@@ -52,7 +52,7 @@ To run use a command with the following format:
 python < runner py file > < config file full path >  
 
 *Example:*  
-python sa_runners/tf-classifier_runner.py $HOME/NNFramework/config/config_tcga_resnet-101.ini  
+python sa_runners/tf_classifier_runner.py $HOME/NNFramework/config/config_tcga_resnet-101.ini  
 
 
 
@@ -69,7 +69,7 @@ module unload singularity
 module load singularity/2.5.1  
 singularity run --writable  --bind $SCRATCH --nv $SCRATCH/containers/tensorflow/tf-18.11-py3-w  
 cd < NNFramework_TF directory >  
-python sa_runners/tf-classifier_runner.py $HOME/NNFramework/config_tcga_resnet-101.ini  
+python sa_runners/tf_classifier_runner.py $HOME/NNFramework/config_tcga_resnet-101.ini  
   
 #### Run as a SLURM batch job:  
 Run one of the batch files in the batch_files folder. *Example:*  
