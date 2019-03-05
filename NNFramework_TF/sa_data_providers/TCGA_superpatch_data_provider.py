@@ -15,7 +15,7 @@ import math;
 import sys;
 import time;
 
-class TCGABatchDataProvider(AbstractDataProvider):
+class TCGASuperpatchBatchDataProvider(AbstractDataProvider):
     def __init__(self, is_test, filepath_data, filepath_label, n_channels, n_classes, do_preprocess, do_augment, data_var_name=None, label_var_name=None, permute=False, repeat=True, kwargs={}):
         #super(MatDataProvider, self).__init__(filepath_data, filepath_label, n_channels, n_classes);
         args = {'input_img_height':460, 'input_img_width': 700, 'file_name_suffix':'', 'pre_resize':'False', 'postprocess':'False'};
@@ -53,6 +53,8 @@ class TCGABatchDataProvider(AbstractDataProvider):
         self.in_size_x = None;
         self.in_size_y = None;
 
+        self.n_subpatches_per_side = 8;
+
         if(do_augment):
             self.tf_data_points = tf.placeholder(dtype=tf.float32, shape=(None, None, None, None))
             self.tf_translations = tf.placeholder(dtype=tf.float32, shape=(None, None))
@@ -61,7 +63,7 @@ class TCGABatchDataProvider(AbstractDataProvider):
             self.tf_post_crop_x1 = tf.placeholder(dtype=tf.int32)
             #print('aug_hue = ', self.aug_hue_max/255.0)
 
-            #######  TODO: NOT FROM Configuration - preset
+            ###### TODO: Make augmentation configured - not preset
             self.tf_data_points_tmp1 = tf.image.random_flip_left_right(self.tf_data_points);
             self.tf_data_points_tmp2 = tf.image.random_flip_up_down(self.tf_data_points_tmp1);
             self.tf_data_points_tmp3 = tf.contrib.image.rotate(self.tf_data_points_tmp2, self.tf_angles);
@@ -84,10 +86,38 @@ class TCGABatchDataProvider(AbstractDataProvider):
         self.data = None;
         self.labels = None;
 
-        file_pattern = '*.png';
-        file_pattern_full = os.path.join(self.filepath_data, '**', file_pattern);
-        #print('file_pattern_full = ', file_pattern_full );
-        self.data = glob.glob(file_pattern_full, recursive=True);
+        self.cancer_type_list = [];
+        self.filename_list = [];
+        self.individual_labels_list = []
+        self.avg_label_list = []
+        self.pred_old_list = []
+
+        # read csv file
+        with open(os.path.join(self.filepath_label), 'r') as label_file:
+            line = label_file.readline();
+            line = label_file.readline();
+            while(line):
+                c, s, p, i1, i2, i3, i4, i5, i6, pred_old= line.split(',');
+                if (i1.strip()==""):
+                    i1 = 0;
+                if (i2.strip()==""):
+                    i2 = 0;
+                if (i3.strip()==""):
+                    i3 = 0;
+                if (i4.strip()==""):
+                    i4 = 0;
+                if (i5.strip()==""):
+                    i5 = 0;
+                if (i6.strip()==""):
+                    i6 = 0;
+                self.cancer_type_list.append(c);
+                self.filename_list.append(s+'_'+p+'.png');
+                self.individual_labels_list.append([int(i1), int(i2), int(i3), int(i4), int(i5), int(i6)]);
+                self.avg_label_list.append(np.mean(np.array([float(i1), float(i2), float(i3), float(i4), float(i5), float(i6)])));
+                self.pred_old_list.append(pred_old);
+                line = label_file.readline();
+
+        self.data = self.filename_list;
         self.data_count = len(self.data);
 
         ### Load data file
@@ -169,8 +199,10 @@ class TCGABatchDataProvider(AbstractDataProvider):
         #data_point = tf.image.per_image_standardization(data_point);
 
         if(self.filepath_label == None):
+            #print("return 1")
             return data_point;
         else:
+            #print("return 2")
             return data_point, label;
 
     ## returns None, None if there is no more data to retrieve and repeat = false
@@ -325,49 +357,41 @@ class TCGABatchDataProvider(AbstractDataProvider):
         data_size_x = self.input_img_width;
         data_size_y = self.input_img_height;    
 
-        data_labels = np.zeros((n, self.n_classes))       
-        self.datapoints_files_list = [];# will be filled by load data point
-        #tic1 = time.time();
-        if(self.in_size_x is None):
-            dp, data_labels[0,:] = self.get_next_one();
-            self.in_size_y = dp.shape[0];
-            self.in_size_x = dp.shape[1];
-            data_points = np.zeros((n, self.in_size_y, self.in_size_x, self.n_channels))
-            data_points[0,:,:,:] = dp;
-            for i in range(1, n):
-                #data_points[i], data_labels[i] = self.get_next_one();
-                data_points[i, :,:,:], data_labels[i,:] = self.get_next_one();
-                #datapoints_list.append(data_point_tmp);
-                #labels_list.append(data_label_tmp);
-        else:
-            data_points = np.zeros((n, self.in_size_y, self.in_size_x, self.n_channels))
-            data_labels = np.zeros((n, self.n_classes))
-            for i in range(0, n):
-                #data_points[i], data_labels[i] = self.get_next_one();
-                data_points[i, :,:,:], data_labels[i,:] = self.get_next_one();
-                #datapoints_list.append(data_point_tmp);
-                #labels_list.append(data_label_tmp);
-        #tic2 = time.time();
-        #print('time get_next_one = ', tic2 - tic1);
-        #sys.stdout.flush()
+        data_points, data_labels = self.get_next_one();
 
-        #data_points = tf.stack(datapoints_list);
-        #data_points = np.stack(datapoints_list);
-        #if(labels_list is not None):
-        #    #data_labels = tf.stack(labels_list);
-        #    data_labels = np.stack(labels_list);
-        #print('data_points =' + str(np.shape(data_points)))
-        #sys.stdout.flush();
+        #data_labels = np.zeros((n, self.n_classes))       
+        #self.datapoints_files_list = [];# will be filled by load data point
+        ##tic1 = time.time();
+        #if(self.in_size_x is None):
+        #    dp, data_labels[0,:] = self.get_next_one();
+        #    self.in_size_y = dp.shape[0];
+        #    self.in_size_x = dp.shape[1];
+        #    data_points = np.zeros((n, self.in_size_y, self.in_size_x, self.n_channels))
+        #    data_points[0,:,:,:] = dp;
+        #    for i in range(1, n):
+        #        #data_points[i], data_labels[i] = self.get_next_one();
+        #        data_points[i, :,:,:], data_labels[i,:] = self.get_next_one();
+        #        #datapoints_list.append(data_point_tmp);
+        #        #labels_list.append(data_label_tmp);
+        #else:
+        #    data_points = np.zeros((n, self.in_size_y, self.in_size_x, self.n_channels))
+        #    data_labels = np.zeros((n, self.n_classes))
+        #    for i in range(0, n):
+        #        #data_points[i], data_labels[i] = self.get_next_one();
+        #        data_points[i, :,:,:], data_labels[i,:] = self.get_next_one();
+        #        #datapoints_list.append(data_point_tmp);
+        #        #labels_list.append(data_label_tmp);
+  
 
-        if(self.do_augment == True):
-            #tic1 = time.time();
-            data_points, data_labels = self.augment_batch_new3(data_points, data_labels);
-            ## debug
-            #for i in range(0,n):
-            #    io.imsave('/pylon5/ac3uump/shahira/tcga/tmp/'+ str(self.tmp_index) + '_' + str(i)+ '.png',  data_points[i,:,:,:].astype(np.int64));
-            #tic2 = time.time();
-            #print('time augment = ', tic2 - tic1);
-            #sys.stdout.flush()
+        #if(self.do_augment == True):
+        #    #tic1 = time.time();
+        #    data_points, data_labels = self.augment_batch_new3(data_points, data_labels);
+        #    ## debug
+        #    #for i in range(0,n):
+        #    #    io.imsave('/pylon5/ac3uump/shahira/tcga/tmp/'+ str(self.tmp_index) + '_' + str(i)+ '.png',  data_points[i,:,:,:].astype(np.int64));
+        #    #tic2 = time.time();
+        #    #print('time augment = ', tic2 - tic1);
+        #    #sys.stdout.flush()
 
         #if(self.do_postprocess):
         #    tic1 = time.time();
@@ -391,6 +415,9 @@ class TCGABatchDataProvider(AbstractDataProvider):
 
         #### Norm with mean = 0 and std = 2
         np.clip(data_points, 0, 255, data_points);
+        #print('data_points.shape = ', data_points.shape)
+        #print('data_points.dtype = ', data_points.dtype)
+        data_points = data_points.astype(np.float);
         data_points /= 255;
         data_points -= 0.5;
         data_points *= 2;
@@ -399,29 +426,34 @@ class TCGABatchDataProvider(AbstractDataProvider):
         return data_points, data_labels;
 
     def preprocess(self, data_point, label):
-        data_point2 = data_point;
+        data_point_list = [];
+        for i in range(data_point.shape[0]):
+            data_point2 = data_point[i];
 
-        if(self.pre_crop_center):
-            starty = (data_point2.shape[0] - self.pre_crop_height)//2;
-            startx = (data_point2.shape[1] - self.pre_crop_width)//2;
-            endy = starty + self.pre_crop_height;
-            endx = startx + self.pre_crop_width;
-            data_point2 = data_point2[starty:endy, startx:endx, :];
-        if(not(data_point2.shape[0] == self.input_img_height) or not(data_point2.shape[1] == self.input_img_width)):
-            if(self.pre_resize):
-                data_point2 = sktransform.resize(data_point2, (self.input_img_height, self.input_img_width), preserve_range=True, anti_aliasing=True).astype(np.uint8);
-                #data_point2 = tf.image.resize_images(data_point2, [self.input_img_height, self.input_img_width]);
-            elif(self.pre_center):
-                diff_y = self.input_img_height - data_point2.shape[0];
-                diff_x = self.input_img_width - data_point2.shape[1];
-                diff_y_div2 = diff_y//2;
-                diff_x_div2 = diff_x//2;
-                data_point_tmp = np.zeros((self.input_img_height, self.input_img_width, data_point2.shape[2]));
-                if(diff_y >= 0 and diff_x >= 0):
-                    data_point_tmp[diff_y:diff_y+self.input_img_height, diff_x:diff_x+self.input_img_width, :] = data_point2;
-                    data_point2 = data_point_tmp;
-            ##debug
-            #print('after resize: ', data_point2.shape);
+            if(self.pre_crop_center):
+                starty = (data_point2.shape[0] - self.pre_crop_height)//2;
+                startx = (data_point2.shape[1] - self.pre_crop_width)//2;
+                endy = starty + self.pre_crop_height;
+                endx = startx + self.pre_crop_width;
+                data_point2 = data_point2[starty:endy, startx:endx, :];
+            if(not(data_point2.shape[0] == self.input_img_height) or not(data_point2.shape[1] == self.input_img_width)):
+                if(self.pre_resize):
+                    data_point2 = sktransform.resize(data_point2, (self.input_img_height, self.input_img_width), preserve_range=True, anti_aliasing=True).astype(np.uint8);
+                    #data_point2 = tf.image.resize_images(data_point2, [self.input_img_height, self.input_img_width]);
+                elif(self.pre_center):
+                    diff_y = self.input_img_height - data_point2.shape[0];
+                    diff_x = self.input_img_width - data_point2.shape[1];
+                    diff_y_div2 = diff_y//2;
+                    diff_x_div2 = diff_x//2;
+                    data_point_tmp = np.zeros((self.input_img_height, self.input_img_width, data_point2.shape[2]));
+                    if(diff_y >= 0 and diff_x >= 0):
+                        data_point_tmp[diff_y:diff_y+self.input_img_height, diff_x:diff_x+self.input_img_width, :] = data_point2;
+                        data_point2 = data_point_tmp;
+                ##debug
+                #print('after resize: ', data_point2.shape);
+            data_point_list.append(data_point2);
+        data_point2 = np.array(data_point_list);
+        #print('after preprocess data_point2.shape = ', data_point2.shape)
         return data_point2, label;
 
 
@@ -469,8 +501,9 @@ class TCGABatchDataProvider(AbstractDataProvider):
 
 
     def load_datapoint(self, indx):
-        filepath = self.data[indx];
-        self.datapoints_files_list.append(filepath)
+        filepath = os.path.join(self.filepath_data, self.data[indx]);
+        
+        #self.datapoints_files_list.append(filepath)
         #filename_queue = tf.train.string_input_producer([filepath]) #  list of files to read
 
         #reader = tf.WholeFileReader()
@@ -481,17 +514,27 @@ class TCGABatchDataProvider(AbstractDataProvider):
         img = io.imread(filepath);
         if(img.shape[2] > 3): # remove the alpha
             img = img[:,:,0:3];
-        label_str = filepath[-5];
-        if(label_str == '0'):
-            #label = tf.convert_to_tensor([1, 0], dtype=tf.int8);
-            label = np.array([1, 0], dtype=np.int8);
-        elif(label_str == '1'):
-            #label = tf.convert_to_tensor([0, 1], dtype=tf.int8);
-            label = np.array([0, 1], dtype=np.int8);
-        else:
-            label = None;
-        #data_point = tf.convert_to_tensor(img);
-        data_point = img;
+        #label_str = filepath[-5];
+        #if(label_str == '0'):
+        #    #label = tf.convert_to_tensor([1, 0], dtype=tf.int8);
+        #    label = np.array([1, 0], dtype=np.int8);
+        #elif(label_str == '1'):
+        #    #label = tf.convert_to_tensor([0, 1], dtype=tf.int8);
+        #    label = np.array([0, 1], dtype=np.int8);
+        #else:
+        label = None;
+        patch_height, patch_width = int(img.shape[0]//float(self.n_subpatches_per_side)), int(img.shape[1]//float(self.n_subpatches_per_side));
+        #print('patch_height = ', patch_height)
+        #print('patch_width = ', patch_width)
+        data_point = np.zeros((int(self.n_subpatches_per_side*self.n_subpatches_per_side), int(patch_height), int(patch_width ), img.shape[2]));
+        i = 0;
+        for y in range(self.n_subpatches_per_side):
+            for x in range(self.n_subpatches_per_side):
+                data_point[i] =  img[y*patch_height : (y + 1) * patch_height, x*patch_width : (x + 1) * patch_width, :]
+                #io.imsave('/pylon5/ac3uump/shahira/tcga/tmp/'+self.data[indx] + str(i) + '.png', data_point[i].astype(np.uint8));
+                i += 1;
+        #data_point = img;
+            
         return data_point, label;
 
     # prepare the mapping from allowed operations to available operations index
@@ -1102,3 +1145,19 @@ class TCGABatchDataProvider(AbstractDataProvider):
 
 
         return data_points2  
+
+    def write_label_info(self, outpath, prefix):
+        filepath = os.path.join(outpath, prefix + '_cancer_type.pkl');
+        pickle.dump(self.cancer_type_list, open(filepath, 'wb'));
+
+        filepath = os.path.join(outpath, prefix + '_filename.pkl');
+        pickle.dump(self.filename_list, open(filepath, 'wb'));
+
+        filepath = os.path.join(outpath, prefix + '_individual_labels.npy');
+        np.array(self.individual_labels_list).dump(filepath)
+
+        filepath = os.path.join(outpath, prefix + '_avg_label.npy');
+        np.array(self.avg_label_list).dump(filepath);
+
+        filepath = os.path.join(outpath, prefix + '_pred_old.npy');
+        np.array(self.pred_old_list).dump(filepath);

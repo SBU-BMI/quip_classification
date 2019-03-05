@@ -3,10 +3,10 @@
 # ==============================================================================
 import tensorflow as tf;
 
-from sa_net_arch import AbstractCNNArch;
-from sa_net_arch_utilities import CNNArchUtils;
-from sa_net_optimizer import OptimizerTypes, CNNOptimizer;
-from sa_net_data_provider import AbstractDataProvider;
+from .sa_net_arch import AbstractCNNArch;
+from .sa_net_arch_utilities import CNNArchUtils;
+from .sa_net_optimizer import OptimizerTypes, CNNOptimizer;
+from .sa_net_data_provider import AbstractDataProvider;
 
 
 class CNNTrainer:

@@ -11,11 +11,12 @@ from distutils.util import strtobool;
 import tensorflow as tf;
 from skimage import io;
 from skimage import transform as sktransform;
+from skimage.color import rgb2gray, rgb2hed;
 import math;
 import sys;
 import time;
 
-class TCGABatchDataProvider(AbstractDataProvider):
+class TCGABatchGrayHEDataProvider(AbstractDataProvider):
     def __init__(self, is_test, filepath_data, filepath_label, n_channels, n_classes, do_preprocess, do_augment, data_var_name=None, label_var_name=None, permute=False, repeat=True, kwargs={}):
         #super(MatDataProvider, self).__init__(filepath_data, filepath_label, n_channels, n_classes);
         args = {'input_img_height':460, 'input_img_width': 700, 'file_name_suffix':'', 'pre_resize':'False', 'postprocess':'False'};
@@ -61,11 +62,12 @@ class TCGABatchDataProvider(AbstractDataProvider):
             self.tf_post_crop_x1 = tf.placeholder(dtype=tf.int32)
             #print('aug_hue = ', self.aug_hue_max/255.0)
 
-            #######  TODO: NOT FROM Configuration - preset
+            ###### TODO: Make augmentation configured - not preset
             self.tf_data_points_tmp1 = tf.image.random_flip_left_right(self.tf_data_points);
             self.tf_data_points_tmp2 = tf.image.random_flip_up_down(self.tf_data_points_tmp1);
             self.tf_data_points_tmp3 = tf.contrib.image.rotate(self.tf_data_points_tmp2, self.tf_angles);
             self.tf_data_points_tmp4 = tf.image.random_hue(self.tf_data_points_tmp3, self.aug_hue_max/255.0);
+            #self.tf_data_points_tmp4 = self.tf_data_points_tmp3;
             self.tf_data_points_tmp5 = tf.image.random_brightness(self.tf_data_points_tmp4, float(self.aug_brightness_max));
             self.tf_data_points_tmp6 = tf.contrib.image.translate(self.tf_data_points_tmp5, self.tf_translations);
             self.tf_data_points_tmp7 = tf.image.crop_to_bounding_box(self.tf_data_points_tmp6, self.tf_post_crop_y1, self.tf_post_crop_x1, self.post_crop_height, self.post_crop_width);
@@ -169,8 +171,10 @@ class TCGABatchDataProvider(AbstractDataProvider):
         #data_point = tf.image.per_image_standardization(data_point);
 
         if(self.filepath_label == None):
+            #print("return 1")
             return data_point;
         else:
+            #print("return 2")
             return data_point, label;
 
     ## returns None, None if there is no more data to retrieve and repeat = false
@@ -491,7 +495,16 @@ class TCGABatchDataProvider(AbstractDataProvider):
         else:
             label = None;
         #data_point = tf.convert_to_tensor(img);
-        data_point = img;
+        
+        # convert to grayscale and repeat to have 3 channels
+        img_g = (rgb2gray(img) * 255).astype(np.uint8)
+        #coeffs = np.array([0.2125, 0.7154, 0.0721]);
+        #img_g = (img @ coeffs).astype(img.dtype);
+
+        img_he = (rgb2hed(img) * 255).astype(np.uint8);
+        img_he[:,:,2] = img_g;
+        data_point = img_he;
+        #data_point = np.repeat(img_g.reshape(img_g.shape[0], img_g.shape[1],1), 3, axis=-1)
         return data_point, label;
 
     # prepare the mapping from allowed operations to available operations index

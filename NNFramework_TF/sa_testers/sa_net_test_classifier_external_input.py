@@ -36,11 +36,9 @@ class ClassifierTesterExternalInput:
 
     def predict(self, inputs):
         with self.sess.as_default():
-            batch_x = inputs;
-            if (batch_x is None):
+            if (inputs is None):
                 return None;
-            batch_x = tf.image.resize_images(batch_x, (self.cnn_arch.input_img_height, self.cnn_arch.input_img_width));
-            batch_x = batch_x.eval()
+            batch_x = self.preprocess_input(inputs);
 
             batch_y = self.sess.run([self.cnn_arch.logits] \
                 , feed_dict={self.cnn_arch.input_x: batch_x \
@@ -49,3 +47,12 @@ class ClassifierTesterExternalInput:
 
             return batch_y;
 
+    def preprocess_input(self, inputs):
+        # normalize (mean 0, std=2)
+        np.clip(inputs, 0, 255, inputs);
+        inputs /= 255;
+        inputs -= 0.5;
+        inputs *= 2;
+        inputs = tf.image.resize_images(inputs, (self.cnn_arch.input_img_height, self.cnn_arch.input_img_width));
+        inputs = inputs.eval()
+        return inputs;
