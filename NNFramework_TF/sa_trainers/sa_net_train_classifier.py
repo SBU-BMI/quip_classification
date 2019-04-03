@@ -6,11 +6,11 @@ import os;
 from distutils.util import strtobool;
 import glob;
 
-from sa_net_train import CNNTrainer;
-from sa_net_arch import AbstractCNNArch;
-from sa_net_arch_utilities import CNNArchUtils;
-from sa_net_optimizer import OptimizerTypes, CNNOptimizer;
-from sa_net_data_provider import AbstractDataProvider;
+from ..sa_net_train import CNNTrainer;
+from ..sa_net_arch import AbstractCNNArch;
+from ..sa_net_arch_utilities import CNNArchUtils;
+from ..sa_net_optimizer import OptimizerTypes, CNNOptimizer;
+from ..sa_net_data_provider import AbstractDataProvider;
 import sys 
 import time
 import pickle
@@ -57,6 +57,8 @@ class ClassifierTrainer(CNNTrainer):
         self.epoch_out_filewriter = open(self.epoch_out_filename, 'a+' );
         self.minibatch_out_filewriter = open(self.minibatch_out_filename, 'a+' );
         best_saved_model_filename = None;
+        best_F1_saved_model_filename = None;
+        best_loss_saved_model_filename = None;
         last_saved_model_filename = None;
         last_saved_subepoch_model_filename = None;
 
@@ -71,8 +73,12 @@ class ClassifierTrainer(CNNTrainer):
             self.validate_epoch_size = round(self.validate_data_provider.data_count / float(self.batch_size) + 0.5);
 
         best_validation_accuracy = 0;
+        best_validation_F1 = 0;
+        best_validation_loss = 1000;
         best_train_val_avg_accuracy = 0;
         current_validation_accuracy = None;
+        current_validation_F1 = None;
+        current_validation_loss = None;
         current_train_val_avg_accuracy = None;   
         total_cost = 0;
         total_correct_count = 0;
@@ -189,6 +195,10 @@ class ClassifierTrainer(CNNTrainer):
                         validate_total_loss = 0;
                         validate_correct_count = 0;
                         validate_count = 0;
+                        TP = 0;
+                        TN = 0;
+                        FP = 0;
+                        FN = 0;
                         t_sum = [0 for c in range(self.cnn_arch.n_classes)]
                         f_sum = [0 for c in range(self.cnn_arch.n_classes)]
                         for validate_step in range(0, self.validate_epoch_size):
@@ -219,12 +229,23 @@ class ClassifierTrainer(CNNTrainer):
                                 f = np.logical_and(l == c, correct_pred == False);
                                 t_sum[c] += t.astype(int).sum();
                                 f_sum[c] += f.astype(int).sum();
-                            #break;
+                                
+                            TP += np.logical_and(l == 1, correct_pred == True).astype(int).sum();
+                            TN += np.logical_and(l == 0, correct_pred == True).astype(int).sum();
+                            FN += np.logical_and(l == 1, correct_pred == False).astype(int).sum();
+                            FP += np.logical_and(l == 0, correct_pred == False).astype(int).sum();
 
+                            #break;
+                        
                         current_validation_accuracy = validate_correct_count / float(validate_count);
                         current_train_val_avg_accuracy = (current_train_accuracy + current_validation_accuracy)/2.0;
+                        val_precision = TP / float(TP + FP);
+                        val_recall = TP / float(TP + FN);
+                        val_f1 = 2 / (1/val_precision + 1/val_recall);
+                        val_loss = validate_total_loss/ float(self.validate_epoch_size);
                         self.output_epoch_info(epoch, validate_total_loss, self.validate_epoch_size, validate_correct_count, validate_count);                        
                         self.output_epoch_info_per_class(t_sum, f_sum);
+                        self.output_epoch_info_F1(TP, TN, FP, FN, val_precision, val_recall, val_f1);
                         #self.output_epoch_info(epoch, validate_total_loss, self.validate_epoch_size, validate_correct_count, validate_count);                        
                         #print('validation_accuracy = ', current_validation_accuracy);
 
@@ -234,6 +255,16 @@ class ClassifierTrainer(CNNTrainer):
 		                    #or (current_validation_accuracy >= best_validation_accuracy) \
 		                    #or (current_train_val_avg_accuracy >= best_train_val_avg_accuracy) \
 		                    #):
+                        saved = False;
+                        if(val_f1 > best_validation_F1):
+	                        #self.cnn_arch.save_model(sess, '_epoch_' + str(epoch));
+                            best_validation_F1 = val_f1;
+                            #best_train_val_avg_accuracy = current_train_val_avg_accuracy;
+                            print("Saving model:");
+                            new_best_F1_saved_model_filename = self.cnn_arch.save_model(sess, self.optimizer, epoch, suffix="_F1");
+                            self.delete_model_files(best_F1_saved_model_filename);
+                            best_F1_saved_model_filename = new_best_F1_saved_model_filename;
+                            saved = True;
                         if((current_validation_accuracy is None) 
 		                    or (current_validation_accuracy > best_validation_accuracy) \
 		                    ):
@@ -241,12 +272,21 @@ class ClassifierTrainer(CNNTrainer):
                             best_validation_accuracy = current_validation_accuracy;
                             #best_train_val_avg_accuracy = current_train_val_avg_accuracy;
                             print("Saving model:");
-                            new_best_saved_model_filename = self.cnn_arch.save_model(sess, self.optimizer, epoch);
+                            new_best_saved_model_filename = self.cnn_arch.save_model(sess, self.optimizer, epoch, suffix="_accuracy");
                             self.delete_model_files(best_saved_model_filename);
                             best_saved_model_filename = new_best_saved_model_filename;
-                        else:
+                            saved = True;
+                        if(val_loss < best_validation_loss):
+                            best_validation_loss = val_loss;
+                            print("Saving model:");
+                            new_best_loss_saved_model_filename = self.cnn_arch.save_model(sess, self.optimizer, epoch, suffix="_loss");
+                            self.delete_model_files(best_loss_saved_model_filename);
+                            best_loss_saved_model_filename = new_best_loss_saved_model_filename;
+                            saved = True;
+                        if(not saved or not self.save_best_only):
                             new_saved_model_filename = self.cnn_arch.save_model(sess, self.optimizer, epoch);
-                            self.delete_model_files(last_saved_model_filename);
+                            if(not self.save_best_only):
+                                self.delete_model_files(last_saved_model_filename);
                             last_saved_model_filename = new_saved_model_filename;
 
 		                # permute the training data for the next epoch
@@ -332,6 +372,22 @@ class ClassifierTrainer(CNNTrainer):
             self.write_to_filename('class ' + str(c) + ': Correct = ' + str(t_sum[c]) + ' Wrong = ' + str(f_sum[c]) \
                 , self.minibatch_out_filename
             );
+        sys.stdout.flush()
+
+    def output_epoch_info_F1(self, TP, TN, FP, FN, precision, recall, F1):
+        print('TP = ', TP, ', TN = ', TN, ', FP = ', FP, ', FN = ', FN, '\r\n' );
+        self.write_to_filename('TP = ' + str(TP) + ', TN = ' + str(TN) + ', FP = ' + str(FP) + ', FN = ' + str(FN) \
+            , self.epoch_out_filename
+        );
+        self.write_to_filename('precision = ' + str(precision) + ', recall = ' + str(recall) + ', F1 = ' + str(F1)  \
+            , self.epoch_out_filename
+        );
+        self.write_to_filename('TP = ' + str(TP) + ', TN = ' + str(TN) + ', FP = ' + str(FP) + ', FN = ' + str(FN) \
+            , self.minibatch_out_filename
+        );
+        self.write_to_filename('precision = ' + str(precision) + ', recall = ' + str(recall) + ', F1 = ' + str(F1)  \
+            , self.minibatch_out_filename
+        );
         sys.stdout.flush()
 
     def write_to_file(self, text, filewriter):

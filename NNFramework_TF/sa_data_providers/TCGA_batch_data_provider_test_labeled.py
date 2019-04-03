@@ -15,11 +15,10 @@ import math;
 import sys;
 import time;
 
-class TCGABatchDataProvider(AbstractDataProvider):
+class TCGABatchDataProviderTestLabelled(AbstractDataProvider):
     def __init__(self, is_test, filepath_data, filepath_label, n_channels, n_classes, do_preprocess, do_augment, data_var_name=None, label_var_name=None, permute=False, repeat=True, kwargs={}):
         #super(MatDataProvider, self).__init__(filepath_data, filepath_label, n_channels, n_classes);
-        args = {'input_img_height':460, 'input_img_width': 700, 'file_name_suffix':'', 'pre_resize':'False', 'postprocess':'False'
-        , 'pad_y':0, 'pad_x':0, 'color_norm':'False', 'color_norm_ref_img':None};
+        args = {'input_img_height':460, 'input_img_width': 700, 'file_name_suffix':'', 'pre_resize':'False', 'postprocess':'False'};
         args.update(kwargs);    
         self.input_img_height = int(args['input_img_height']);
         self.input_img_width = int(args['input_img_width']);
@@ -41,12 +40,6 @@ class TCGABatchDataProvider(AbstractDataProvider):
         self.label_var_name = label_var_name;
         self.do_permute = permute;
         self.do_repeat = repeat;
-        self.pad_y = int(args['pad_y']);
-        self.pad_x = int(args['pad_x']);
-        self.pad_y1 = int(np.floor(self.pad_y / 2.0));
-        self.pad_y2 = int(np.ceil(self.pad_y / 2.0));
-        self.pad_x1 = int(np.floor(self.pad_y / 2.0));
-        self.pad_x2 = int(np.ceil(self.pad_y / 2.0));
         if(do_augment):
             self.create_augmentation_map(kwargs);
         if(self.do_postprocess):
@@ -68,7 +61,7 @@ class TCGABatchDataProvider(AbstractDataProvider):
             self.tf_post_crop_x1 = tf.placeholder(dtype=tf.int32)
             #print('aug_hue = ', self.aug_hue_max/255.0)
 
-            #######  TODO: NOT FROM Configuration - preset
+            ###### TODO: Make augmentation configured - not preset
             self.tf_data_points_tmp1 = tf.image.random_flip_left_right(self.tf_data_points);
             self.tf_data_points_tmp2 = tf.image.random_flip_up_down(self.tf_data_points_tmp1);
             self.tf_data_points_tmp3 = tf.contrib.image.rotate(self.tf_data_points_tmp2, self.tf_angles);
@@ -96,6 +89,21 @@ class TCGABatchDataProvider(AbstractDataProvider):
         #print('file_pattern_full = ', file_pattern_full );
         self.data = glob.glob(file_pattern_full, recursive=True);
         self.data_count = len(self.data);
+        self.labels = np.zeros(( self.data_count))    
+
+        indx = 0;
+        for file in self.data:
+            print(file);
+            label_str = file[-5];
+            print(label_str);
+            if(label_str == '0'):
+                label = 0;
+            elif(label_str == '1'):
+                label = 1;
+            else:
+                label = -1;            
+            self.labels[indx] = label;
+            indx += 1;
 
         ### Load data file
         #for batch_id in range(1, 6):
@@ -176,8 +184,10 @@ class TCGABatchDataProvider(AbstractDataProvider):
         #data_point = tf.image.per_image_standardization(data_point);
 
         if(self.filepath_label == None):
+            #print("return 1")
             return data_point;
         else:
+            #print("return 2")
             return data_point, label;
 
     ## returns None, None if there is no more data to retrieve and repeat = false
@@ -402,11 +412,6 @@ class TCGABatchDataProvider(AbstractDataProvider):
         data_points -= 0.5;
         data_points *= 2;
 
-        if(self.pad_y > 0 or self.pad_x > 0):
-            #data_points = np.pad(data_points, ((0,0),(self.pad_y1, self.pad_y2),(self.pad_x1, self.pad_x2),(0,0)),'constant');
-            data_points = np.pad(data_points, ((0,0),(self.pad_y1, self.pad_y2),(self.pad_x1, self.pad_x2),(0,0)),'constant', constant_values=1);
-            #data_points = np.pad(data_points, ((0,0),(self.pad_y1, self.pad_y2),(self.pad_x1, self.pad_x2),(0,0)),'constant', constant_values=128);
-
 
         return data_points, data_labels;
 
@@ -482,6 +487,7 @@ class TCGABatchDataProvider(AbstractDataProvider):
 
     def load_datapoint(self, indx):
         filepath = self.data[indx];
+        print(filepath);
         self.datapoints_files_list.append(filepath)
         #filename_queue = tf.train.string_input_producer([filepath]) #  list of files to read
 
@@ -491,6 +497,7 @@ class TCGABatchDataProvider(AbstractDataProvider):
         #img = tf.image.decode_png(value) # use png or jpg decoder based on your files.
         #print('filepath=', filepath)
         img = io.imread(filepath);
+        print(img.shape);
         if(img.shape[2] > 3): # remove the alpha
             img = img[:,:,0:3];
         label_str = filepath[-5];
@@ -1114,3 +1121,12 @@ class TCGABatchDataProvider(AbstractDataProvider):
 
 
         return data_points2  
+
+
+
+    def write_label_info(self, outpath, prefix):
+        filepath = os.path.join(outpath, prefix + '_filename.pkl');
+        pickle.dump(self.data, open(filepath, 'wb'));
+
+        filepath = os.path.join(outpath, prefix + '_individual_labels.npy');
+        np.array(self.labels).dump(filepath)

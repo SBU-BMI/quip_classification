@@ -1,7 +1,7 @@
 # author: Shahira Abousamra <shahira.abousamra@stonybrook.edu>
 # created: 12.23.2018 
 # ==============================================================================
-from sa_net_data_provider import AbstractDataProvider;
+from ..sa_net_data_provider import AbstractDataProvider;
 from numpy import random;
 
 #import scipy.io as spio;

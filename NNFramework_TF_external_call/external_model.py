@@ -26,8 +26,12 @@ def pred_by_external_model(model, inputs):
     #     Each entry is a probability ranges 0.0 ~ 1.0
     inputs = inputs.transpose((0, 2, 3, 1))
     pred = model.predict(inputs)[0]
-    exp_pred = np.exp(pred - np.max(pred, axis=-1, keepdims=True) + 1)
-    return exp_pred[..., -1:] / np.sum(exp_pred, axis=-1, keepdims=True)
+    #exp_pred = np.exp(pred - np.max(pred, axis=-1, keepdims=True) + 1)
+    #return exp_pred[..., -1:] / np.sum(exp_pred, axis=-1, keepdims=True)
+
+    sig_pred = (1 / (1 + np.exp(-pred)))
+    sig_pred = sig_pred[..., -1:] ;
+    return sig_pred
 
 if __name__ == "__main__":
     

@@ -3,37 +3,45 @@ import os;
 import tensorflow as tf;
 import configparser;
 
-if __name__ == "__main__":
+#if __name__ == "__main__":
+def main(args):
     sys.path.append("..");
     sys.path.append(".");
+    sys.path.append("../..");
+    sys.path.append("...");
 
     #from sa_data_providers.cifar10_data_provider import Cifar10DataProvider;
-    from sa_networks.simple_classifier_arch import SimpleClassifierArch;
+    #from sa_networks.simple_classifier_arch import SimpleClassifierArch;
     #from sa_networks.inception_resnet_v2_classifier_arch import InceptionResnetV2ClassifierArch;
-    from sa_trainers.sa_net_train_classifier import ClassifierTrainer;
-    from sa_testers.sa_net_test_classifier import ClassifierTester;
-    from sa_net_optimizer import OptimizerTypes;
-    from sa_net_loss_func_helper import CostFuncTypes;
-    from sa_cost_func.mse_cost_func import MSECost;
-    from sa_cost_func.cross_entropy_cost_func import CrossEntropyCost;
+
+    from ..sa_trainers.sa_net_train_classifier import ClassifierTrainer;
+    from ..sa_testers.sa_net_test_classifier import ClassifierTester;
+    from ..sa_net_optimizer import OptimizerTypes;
+    from ..sa_net_loss_func_helper import CostFuncTypes;
+    from ..sa_cost_func.mse_cost_func import MSECost;
+    from ..sa_cost_func.cross_entropy_cost_func import CrossEntropyCost;
 
 
     # Read input arguments
-    min_arg_count = 2;
-    arg_count = len(sys.argv);
+    #min_arg_count = 2;
+    min_arg_count = 1;
+    #arg_count = len(sys.argv);
+    arg_count = len(args);
     print('number of arguments = ' +  str(arg_count));
-    for val in sys.argv:
-        print(val);
+    #for val in sys.argv:
+    #    print(val);
 
     if(arg_count < min_arg_count):
         print('error: number of arguments < {}'.format(min_arg_count));
         sys.exit();
 
-    config_filepath = sys.argv[1];
+    #config_filepath = sys.argv[1];
+    config_filepath = args[0];
 
     device_ids_str = None;
     if(arg_count > min_arg_count):
-        device_ids_str = sys.argv[2];
+        #device_ids_str = sys.argv[2];
+        device_ids_str = args[1];
         
 
     # read the gpu ids to use from the command line parameters if cuda is available
@@ -129,47 +137,54 @@ if __name__ == "__main__":
         cost_func = MSECost(n_classes = n_classes, kwargs=cost_params);
     elif(cost_func_class_name == 'CrossEntropyCost'):
         cost_func = CrossEntropyCost(n_classes = n_classes, kwargs=cost_params);
+    elif(cost_func_class_name == 'CrossEntropySMCost'):
+        from ..sa_cost_func.cross_entropy_sm_cost_func import CrossEntropySMCost;
+        cost_func = CrossEntropySMCost(n_classes = n_classes, kwargs=cost_params);
+    elif(cost_func_class_name == 'CrossEntropySMSparseCost'):
+        from ..sa_cost_func.cross_entropy_sm_sparse_cost_func import CrossEntropySMSparseCost;
+        cost_func = CrossEntropySMSparseCost(n_classes = n_classes, kwargs=cost_params);
     else:
         print('error: cost function class name \'{}\' is not supported by runner'.format(cost_func_class_name));
         sys.exit();        
 
     
     if(network_class_name == 'SimpleClassifier'):
+        from ..sa_networks.simple_classifier_arch import SimpleClassifierArch;
         cnn_arch = SimpleClassifierArch(n_channels = n_channels, n_classes = n_classes, model_out_path = model_path, model_base_filename = model_base_filename, model_restore_filename = model_restore_filename, cost_func = cost_func \
             , kwargs=network_params \
             );
     elif(network_class_name == 'InceptionResnetV2Classifier'):
-        from sa_networks.inception_resnet_v2_classifier_arch import InceptionResnetV2ClassifierArch;
+        from ..sa_networks.inception_resnet_v2_classifier_arch import InceptionResnetV2ClassifierArch;
         cnn_arch = InceptionResnetV2ClassifierArch(n_channels = n_channels, n_classes = n_classes, model_out_path = model_path, model_base_filename = model_base_filename, model_restore_filename = model_restore_filename, cost_func = cost_func \
             , kwargs=network_params \
             );
     elif(network_class_name == 'InceptionV4Classifier'):
-        from sa_networks.inception_v4_classifier_arch import InceptionV4ClassifierArch;
+        from ..sa_networks.inception_v4_classifier_arch import InceptionV4ClassifierArch;
         cnn_arch = InceptionV4ClassifierArch(n_channels = n_channels, n_classes = n_classes, model_out_path = model_path, model_base_filename = model_base_filename, model_restore_filename = model_restore_filename, cost_func = cost_func \
             , kwargs=network_params \
             );
     elif(network_class_name == 'Resnet101Classifier'):
-        from sa_networks.resnet_101_classifier_arch import Resnet101ClassifierArch;
+        from ..sa_networks.resnet_101_classifier_arch import Resnet101ClassifierArch;
         cnn_arch = Resnet101ClassifierArch(n_channels = n_channels, n_classes = n_classes, model_out_path = model_path, model_base_filename = model_base_filename, model_restore_filename = model_restore_filename, cost_func = cost_func \
             , kwargs=network_params \
             );
     elif(network_class_name == 'Resnet152Classifier'):
-        from sa_networks.resnet_152_classifier_arch import Resnet152ClassifierArch;
+        from ..sa_networks.resnet_152_classifier_arch import Resnet152ClassifierArch;
         cnn_arch = Resnet152ClassifierArch(n_channels = n_channels, n_classes = n_classes, model_out_path = model_path, model_base_filename = model_base_filename, model_restore_filename = model_restore_filename, cost_func = cost_func \
             , kwargs=network_params \
             );
     elif(network_class_name == 'Resnet50Classifier'):
-        from sa_networks.resnet_50_classifier_arch import Resnet50ClassifierArch;
+        from ..sa_networks.resnet_50_classifier_arch import Resnet50ClassifierArch;
         cnn_arch = Resnet50ClassifierArch(n_channels = n_channels, n_classes = n_classes, model_out_path = model_path, model_base_filename = model_base_filename, model_restore_filename = model_restore_filename, cost_func = cost_func \
             , kwargs=network_params \
             );
     elif(network_class_name == 'Resnet18Classifier'):
-        from sa_networks.resnet_18_classifier_arch import Resnet18ClassifierArch;
+        from ..sa_networks.resnet_18_classifier_arch import Resnet18ClassifierArch;
         cnn_arch = Resnet18ClassifierArch(n_channels = n_channels, n_classes = n_classes, model_out_path = model_path, model_base_filename = model_base_filename, model_restore_filename = model_restore_filename, cost_func = cost_func \
             , kwargs=network_params \
             );
     elif(network_class_name == 'VGG16Classifier'):
-        from sa_networks.vgg_16_classifier_arch import VGG16ClassifierArch;
+        from ..sa_networks.vgg_16_classifier_arch import VGG16ClassifierArch;
         cnn_arch = VGG16ClassifierArch(n_channels = n_channels, n_classes = n_classes, model_out_path = model_path, model_base_filename = model_base_filename, model_restore_filename = model_restore_filename, cost_func = cost_func \
             , kwargs=network_params \
             );
@@ -179,7 +194,7 @@ if __name__ == "__main__":
 
     if(is_test == False):
         if(train_dataprovider_class_name == 'TCGADataProvider'):
-            from sa_data_providers.TCGA_data_provider import TCGADataProvider;
+            from ..sa_data_providers.TCGA_data_provider import TCGADataProvider;
             train_data_provider = TCGADataProvider( \
                 is_test=is_test \
                 , filepath_data = train_filepath_data \
@@ -195,7 +210,7 @@ if __name__ == "__main__":
                 , kwargs = train_params\
             );
         elif(train_dataprovider_class_name == 'TCGABatchDataProvider'):
-            from sa_data_providers.TCGA_batch_data_provider import TCGABatchDataProvider;
+            from ..sa_data_providers.TCGA_batch_data_provider import TCGABatchDataProvider;
             train_data_provider = TCGABatchDataProvider( \
                 is_test=is_test \
                 , filepath_data = train_filepath_data \
@@ -232,9 +247,9 @@ if __name__ == "__main__":
 
         if(has_validation):
             if(validate_dataprovider_class_name == 'TCGADataProvider'):
-                from sa_data_providers.TCGA_data_provider import TCGADataProvider;
+                from ..sa_data_providers.TCGA_data_provider import TCGADataProvider;
                 validate_data_provider = TCGADataProvider( \
-                    is_test=is_test \
+                    is_test=True \
                     , filepath_data = validate_filepath_data \
                     , filepath_label = validate_filepath_label \
                     , n_channels = n_channels \
@@ -248,7 +263,7 @@ if __name__ == "__main__":
                     , kwargs = validate_params\
                 ); 
             elif(validate_dataprovider_class_name == 'TCGABatchDataProvider'):
-                from sa_data_providers.TCGA_batch_data_provider import TCGABatchDataProvider;
+                from ..sa_data_providers.TCGA_batch_data_provider import TCGABatchDataProvider;
                 validate_data_provider = TCGABatchDataProvider( \
                     is_test=is_test \
                     , filepath_data = validate_filepath_data \
@@ -265,12 +280,12 @@ if __name__ == "__main__":
                 ); 
     else:
         if(test_dataprovider_class_name == 'TCGADataProvider'):
-            from sa_data_providers.TCGA_data_provider import TCGADataProvider;
+            from ..sa_data_providers.TCGA_data_provider import TCGADataProvider;
             ########### to do: should allow list of files
             test_data_provider = TCGADataProvider( \
                 is_test=is_test \
                 , filepath_data = test_filepath_data \
-                , filepath_label = None \
+                , filepath_label = test_filepath_label \
                 , n_channels = n_channels \
                 , n_classes = n_classes \
                 , do_preprocess = test_preprocess \
@@ -282,12 +297,12 @@ if __name__ == "__main__":
                 , kwargs = test_params\
             );
         elif(test_dataprovider_class_name == 'TCGABatchDataProvider'):
-            from sa_data_providers.TCGA_batch_data_provider import TCGABatchDataProvider;
+            from ..sa_data_providers.TCGA_batch_data_provider import TCGABatchDataProvider;
             ########### to do: should allow list of files
             test_data_provider = TCGABatchDataProvider( \
                 is_test=is_test \
                 , filepath_data = test_filepath_data \
-                , filepath_label = None \
+                , filepath_label = test_filepath_label \
                 , n_channels = n_channels \
                 , n_classes = n_classes \
                 , do_preprocess = test_preprocess \
@@ -298,6 +313,57 @@ if __name__ == "__main__":
                 , repeat = False \
                 , kwargs = test_params\
             );
+        elif(test_dataprovider_class_name == 'TCGABatchGrayHEDataProvider'):
+            from ..sa_data_providers.TCGA_batch_gray_he_data_provider import TCGABatchGrayHEDataProvider;
+            ########### to do: should allow list of files
+            test_data_provider = TCGABatchGrayHEDataProvider( \
+                is_test=is_test \
+                , filepath_data = test_filepath_data \
+                , filepath_label = test_filepath_label \
+                , n_channels = n_channels \
+                , n_classes = n_classes \
+                , do_preprocess = test_preprocess \
+                , do_augment = test_augment \
+                , data_var_name = None \
+                , label_var_name = None \
+                , permute = False \
+                , repeat = False \
+                , kwargs = test_params\
+            );
+        elif(test_dataprovider_class_name == 'TCGASuperpatchBatchDataProvider'):
+            from ..sa_data_providers.TCGA_superpatch_data_provider import TCGASuperpatchBatchDataProvider;
+            ########### to do: should allow list of files
+            test_data_provider = TCGASuperpatchBatchDataProvider( \
+                is_test=is_test \
+                , filepath_data = test_filepath_data \
+                , filepath_label = test_filepath_label \
+                , n_channels = n_channels \
+                , n_classes = n_classes \
+                , do_preprocess = test_preprocess \
+                , do_augment = test_augment \
+                , data_var_name = None \
+                , label_var_name = None \
+                , permute = False \
+                , repeat = False \
+                , kwargs = test_params\
+            );
+        elif(test_dataprovider_class_name == 'TCGABatchDataProviderTestLabelled'):
+            from ..sa_data_providers.TCGA_batch_data_provider_test_labeled import TCGABatchDataProviderTestLabelled;
+            ########### to do: should allow list of files
+            test_data_provider = TCGABatchDataProviderTestLabelled( \
+                is_test=is_test \
+                , filepath_data = test_filepath_data \
+                , filepath_label = test_filepath_label \
+                , n_channels = n_channels \
+                , n_classes = n_classes \
+                , do_preprocess = test_preprocess \
+                , do_augment = test_augment \
+                , data_var_name = None \
+                , label_var_name = None \
+                , permute = False \
+                , repeat = False \
+                , kwargs = test_params\
+            );        
         else:
             print('error: test data provider class name \'{}\' is not supported by runner'.format(test_dataprovider_class_name));
             sys.exit();        
@@ -333,7 +399,7 @@ if __name__ == "__main__":
                 , kwargs = trainer_params \
             );
         elif(trainer_class_name == 'ClassifierTrainerOpt'):
-            from sa_trainers.sa_net_train_opt_classifier import ClassifierTrainerOpt;
+            from ..sa_trainers.sa_net_train_opt_classifier import ClassifierTrainerOpt;
             trainer = ClassifierTrainerOpt(cnn_arch \
                 , train_data_provider \
                 , validate_data_provider \
@@ -342,7 +408,7 @@ if __name__ == "__main__":
                 , kwargs = trainer_params \
             );
         elif(trainer_class_name == 'ClassifierTrainerMultiGPU'):
-            from sa_trainers.sa_net_train_multi_gpu_classifier import ClassifierTrainerMultiGPU;
+            from ..sa_trainers.sa_net_train_multi_gpu_classifier import ClassifierTrainerMultiGPU;
             trainer = ClassifierTrainerMultiGPU(cnn_arch \
                 , train_data_provider \
                 , validate_data_provider \
@@ -356,6 +422,24 @@ if __name__ == "__main__":
     else:
         if(tester_class_name == 'ClassifierTester'):
             tester = ClassifierTester(cnn_arch \
+                , test_data_provider \
+                , session_config=session_config \
+                , output_dir=tester_out_dir \
+                , output_ext=tester_out_ext \
+                , kwargs = tester_params \
+            );
+        elif(tester_class_name == 'ClassifierTesterBatch'):
+            from ..sa_testers.sa_net_test_classifier_batch import ClassifierTesterBatch;
+            tester = ClassifierTesterBatch(cnn_arch \
+                , test_data_provider \
+                , session_config=session_config \
+                , output_dir=tester_out_dir \
+                , output_ext=tester_out_ext \
+                , kwargs = tester_params \
+            );
+        elif(tester_class_name == 'ClassifierTesterSuperpatchBatch'):
+            from ..sa_testers.sa_net_test_superpatch_classifier_batch import ClassifierTesterSuperpatchBatch;
+            tester = ClassifierTesterSuperpatchBatch(cnn_arch \
                 , test_data_provider \
                 , session_config=session_config \
                 , output_dir=tester_out_dir \

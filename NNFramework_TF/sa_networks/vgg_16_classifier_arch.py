@@ -62,8 +62,8 @@ class VGG16ClassifierArch(AbstractCNNArch):
         self.correct_pred = self.get_correct_prediction(self.logits, self.labels);
         self.accuracy = self.get_accuracy();
 
-        variables_to_restore = slim.get_variables_to_restore(exclude=['Variable', 'Variable_1', 'Variable_2', 'Variable_3', \
-            'vgg_16/fc8'])
+        restore_exclude_list = ['Variable', 'Variable_1', 'Variable_2', 'Variable_3', 'vgg_16/fc8'];
+        variables_to_restore = slim.get_variables_to_restore(exclude=restore_exclude_list);
         #print ([v.name for v in variables_to_restore]);
         #self.saver = tf.train.Saver(var_list =variables_to_restore[1:], max_to_keep=100000);
         self.saver_official = tf.train.Saver(var_list =variables_to_restore, max_to_keep=100000);
