@@ -225,22 +225,6 @@ def main(args):
                 , repeat = True \
                 , kwargs = train_params\
             );
-        elif(train_dataprovider_class_name == 'TCGABatchEqualDataProvider'):
-            from sa_data_providers.TCGA_batch_equal_data_provider import TCGABatchEqualDataProvider;
-            train_data_provider = TCGABatchEqualDataProvider( \
-                is_test=is_test \
-                , filepath_data = train_filepath_data \
-                , filepath_label = train_filepath_label \
-                , n_channels = n_channels \
-                , n_classes = n_classes \
-                , do_preprocess = train_preprocess \
-                , do_augment = train_augment \
-                , data_var_name = None \
-                , label_var_name = None \
-                , permute = train_permute \
-                , repeat = True \
-                , kwargs = train_params\
-            );
         else:
             print('error: train data provider class name \'{}\' is not supported by runner'.format(train_dataprovider_class_name));
             sys.exit();       
@@ -392,24 +376,6 @@ def main(args):
     
         if(trainer_class_name == 'ClassifierTrainer'):
             trainer = ClassifierTrainer(cnn_arch \
-                , train_data_provider \
-                , validate_data_provider \
-                , optimizer_type=optimizer_type \
-                , session_config=session_config \
-                , kwargs = trainer_params \
-            );
-        elif(trainer_class_name == 'ClassifierTrainerOpt'):
-            from ..sa_trainers.sa_net_train_opt_classifier import ClassifierTrainerOpt;
-            trainer = ClassifierTrainerOpt(cnn_arch \
-                , train_data_provider \
-                , validate_data_provider \
-                , optimizer_type=optimizer_type \
-                , session_config=session_config \
-                , kwargs = trainer_params \
-            );
-        elif(trainer_class_name == 'ClassifierTrainerMultiGPU'):
-            from ..sa_trainers.sa_net_train_multi_gpu_classifier import ClassifierTrainerMultiGPU;
-            trainer = ClassifierTrainerMultiGPU(cnn_arch \
                 , train_data_provider \
                 , validate_data_provider \
                 , optimizer_type=optimizer_type \

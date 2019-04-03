@@ -2,7 +2,8 @@
 ## CNN training with Tensorflow
 
 ### Configuration file:  
-To run training create a configuration file similar to config/config_tcga_resnet-101.ini.  
+To run training create a configuration file similar to config/config_incep-all.ini.  
+To run test create a configuration file similar to one of the ini files under config/*_test/.  
 Below are the main parameters that may need to be adjusted for a run:  
 
 ##### DEFAULT section:
@@ -10,14 +11,15 @@ Below are the main parameters that may need to be adjusted for a run:
 **model_path:** The output folder  
 **model_base_filename:** All output files will have this prefix so it is preferably distinctive of the training configuration  
 **model_restore_filename:** The full path of a pretrained model or a previous checkpoint (*optional*)  
+For ImageNet pretrained models we used:  https://github.com/tensorflow/models/tree/master/research/slim
 
 ##### NETWORK section:
-**class_name:** currently supported values are (*Resnet101Classifier, Resnet152Classifier, InceptionV4Classifier, InceptionResnetV2Classifier*)  
+**class_name:** currently supported values are (*VGG16Classifier, Resnet101Classifier, Resnet152Classifier, InceptionV4Classifier, InceptionResnetV2Classifier*)  
 **input_img_height, input_img_width:** the final image height and width that are fed into the network.  
 **official_checkpoint:** supported values (*true, false*). If true, the final fully connected layer is excluded from restoration.  
 
 ##### TRAIN_DATA section:
-**provider_class_name:** currently supported values are (*TCGADataProvider*)  
+**provider_class_name:** currently supported values are (*TCGADataProvider, TCGABatchDataProvider*)  
 **filepath_data:** The path of the data files  
 **filepath_label:** The path of the labels (if there are labels)   
 **preprocess:** supported values (*true, false*). Preprocessing takes place before augmentation. If true then set either pre_resize or pre_center.  
@@ -31,14 +33,19 @@ similar to TRAIN_DATA section. Usually set *augment=false, permute=false*.
 
 ##### TEST_DATA section:
 similar to VALIDATE_DATA section. Only used in *mode=test*.  
+If testing with super patches that should be divided in 8x8 sub patches use *class_name = TCGASuperpatchBatchDataProvider*
 
 ##### TRAINER section:
 **class_name:**  currently supported values are (*ClassifierTrainer*)  
 set other training configuration values according to user preference, like batch size, learning rate, etc...  
 
+##### TESTER section:
+**class_name:**  Use *ClassifierTesterExternalInput* if providing external input and not using a dataprovider (i.e. test data provider class name is set to 'None'), otherwise can use *ClassifierTesterSuperpatchBatch*.
+set other out_dir and batch_size  configuration values according to user preference. If testing with super patches that should be divided in 8x8 sub patches use batch_size =1
+
 ### Customization:
 To create different classes such as for CNN architecture, dataprovider, trainer, or tester they should be supported by the runner file used to execute the training.  
-Current supported runner file is: *tf_classifier_runner.py*  
+Current supported runner file is: *tf_classifier_runner.py*   and for external input (i.e. not using a data provider) use *tf_classifier_runner_external_input.py*
 
 ### Libraries used:
 * Python 3.5 
@@ -69,11 +76,11 @@ module unload singularity
 module load singularity/2.6.1  
 singularity run --writable  --bind $SCRATCH --nv $SCRATCH/containers/tensorflow/tf-18.11-py3-w  
 cd /home/shahira/NNFramework_TF_external_call 
-python external_train.py $HOME/NNFramework/config_tcga_resnet-101.ini  
+python external_train.py $HOME/NNFramework/config_tcga_resnet-101.ini
+
+external_model.py provides api for running from another application without using a data provider.
   
-#### Run as a SLURM batch job:  
-Run one of the batch files in the batch_files folder. *Example:*  
-sbatch batch_files/batch_tcga_resnet101.sh  
+
   
 
 

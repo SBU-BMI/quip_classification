@@ -285,7 +285,7 @@ class ClassifierTrainer(CNNTrainer):
                             saved = True;
                         if(not saved or not self.save_best_only):
                             new_saved_model_filename = self.cnn_arch.save_model(sess, self.optimizer, epoch);
-                            if(not self.save_best_only):
+                            if(self.save_best_only):
                                 self.delete_model_files(last_saved_model_filename);
                             last_saved_model_filename = new_saved_model_filename;
 
