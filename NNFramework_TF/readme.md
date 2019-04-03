@@ -66,10 +66,10 @@ singularity build --sandbox tf-18.11-py3-w docker://nvcr.io/nvidia/tensorflow:18
   
 #### Load and run inside the sandbox Singularity container:  
 module unload singularity  
-module load singularity/2.5.1  
+module load singularity/2.6.1  
 singularity run --writable  --bind $SCRATCH --nv $SCRATCH/containers/tensorflow/tf-18.11-py3-w  
-cd < NNFramework_TF directory >  
-python sa_runners/tf_classifier_runner.py $HOME/NNFramework/config_tcga_resnet-101.ini  
+cd /home/shahira/NNFramework_TF_external_call 
+python external_train.py $HOME/NNFramework/config_tcga_resnet-101.ini  
   
 #### Run as a SLURM batch job:  
 Run one of the batch files in the batch_files folder. *Example:*  
