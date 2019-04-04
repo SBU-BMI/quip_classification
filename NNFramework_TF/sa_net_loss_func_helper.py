@@ -3,6 +3,7 @@
 # ==============================================================================
 import tensorflow as tf;
 from enum import Enum;
+import numpy as np;
 
 class CostFuncTypes(Enum):
     CROSS_ENTROPY = 1
@@ -17,7 +18,7 @@ class CNNLossFuncHelper:
         print(class_weights)
         print(flat_labels)
         print(flat_logits)
-        return tf.reduce_mean(tf.nn.weighted_cross_entropy_with_logits( \
+        return tf.abs(tf.reduce_mean(tf.nn.weighted_cross_entropy_with_logits( \
             logits=flat_logits \
             , targets=flat_labels \
             , pos_weight=class_weights \

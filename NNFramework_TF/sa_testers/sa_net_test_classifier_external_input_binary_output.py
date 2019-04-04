@@ -7,9 +7,11 @@ from ..sa_net_data_provider import AbstractDataProvider;
 import os;
 import numpy as np;
 
-class ClassifierTesterExternalInput:
+class ClassifierTesterExternalInputBinaryOutput:
     def __init__(self, cnn_arch:AbstractCNNArch, session_config, output_dir, output_ext, kwargs):
         # predefined list of arguments
+        args = {'threshold':0.5};
+        args.update(kwargs);
 
         self.cnn_arch = cnn_arch;
         #self.cost_func = cost_func;
@@ -21,6 +23,7 @@ class ClassifierTesterExternalInput:
             self.session_config = session_config;
         self.output_dir = output_dir;
         self.output_ext = output_ext;
+        self.threshold = float(args['threshold']);
 
         self.init = tf.global_variables_initializer();
 
@@ -46,11 +49,11 @@ class ClassifierTesterExternalInput:
                 , feed_dict={self.cnn_arch.input_x: batch_x \
                     , self.cnn_arch.isTest: True \
                 });
-            #print(np.array(batch_y).shape)
-            #print(np.array(batch_y))
-            #print(np.array(batch_y)[...,-1])
             batch_y_sig = self.sigmoid(np.array(batch_y)[...,-1]);
-            return batch_y_sig;
+            batch_y_binary = np.array(batch_y_sig > self.threshold).astype(np.float);
+
+            return batch_y_binary;
+
 
     def sigmoid(self, x):
         return (1 / (1 + np.exp(-x)))

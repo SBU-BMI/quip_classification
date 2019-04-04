@@ -12,7 +12,7 @@ import time
 class ClassifierTesterSuperpatchBatch:
     def __init__(self, cnn_arch:AbstractCNNArch, test_data_provider:AbstractDataProvider, session_config, output_dir, output_ext, kwargs):
         # predefined list of arguments
-        args = {'batch_size':1, 'stats_file_suffix':'_test_stats_out.txt', 'predictions_file_suffix':'_test_pred_out.csv'};
+        args = {'batch_size':1, 'stats_file_suffix':'_test_stats_out.txt', 'predictions_file_suffix':'_test_pred_out.csv', 'threshold':0.5};
         args.update(kwargs);
 
         self.cnn_arch = cnn_arch;
@@ -25,6 +25,7 @@ class ClassifierTesterSuperpatchBatch:
         self.output_dir = output_dir;
         self.output_ext = output_ext;
         self.batch_size = int(args['batch_size']);
+        self.threshold = float(args['threshold']);
         #self.stats_file_suffix = str(args['stats_file_suffix']);
         #self.predictions_file_suffix = str(args['predictions_file_suffix']);
         #self.test_out_filename = os.path.join(self.output_dir, self.cnn_arch.model_base_filename + self.stats_file_suffix);
@@ -36,6 +37,8 @@ class ClassifierTesterSuperpatchBatch:
 
     def test(self, do_init, do_restore, do_load_data):
         self.predictions = [];
+        self.predictions_prob = [];
+        self.predictions_binary = [];
         with tf.Session(config=self.session_config) as sess:
         #with tf.Session() as sess:
             with sess.as_default():
@@ -82,6 +85,7 @@ class ClassifierTesterSuperpatchBatch:
                     batch_x, batch_label = self.test_data_provider.get_next_n(self.batch_size);
                     if(batch_x is None):
                         break;
+                    #print('batch_x.shape = ', batch_x.shape)
                     #cost, correct_pred  = sess.run([self.cnn_arch.cost, self.cnn_arch.correct_pred] \
                     #    , feed_dict={self.cnn_arch.input_x: validate_batch_x.eval() \
                     #    , self.cnn_arch.labels: validate_batch_label.eval() \
@@ -94,10 +98,14 @@ class ClassifierTesterSuperpatchBatch:
                         , self.cnn_arch.isTest: True \
                         , self.cnn_arch.isTraining: False \
                     });
-                    #print(batch_y);
                     batch_y = np.array(batch_y);
                     count += batch_x.shape[0];
                     self.predictions.append(self.sigmoid(batch_y));
+                    batch_y_sig = self.sigmoid(batch_y[..., -1:].squeeze());
+                    self.predictions_prob.append(batch_y_sig);
+                    batch_y_binary = batch_y_sig > self.threshold
+                    self.predictions_binary.append(batch_y_binary);
+
                     #print(self.sigmoid(batch_y));
                     #total_loss += cost;
                     #correct_count += correct_pred.sum();
@@ -138,6 +146,14 @@ class ClassifierTesterSuperpatchBatch:
     def write_predictions(self):
         filepath = os.path.join(self.output_dir, self.cnn_arch.model_base_filename + '_pred_new.npy');
         np.array(self.predictions).dump(filepath);
+
+        filepath = os.path.join(self.output_dir, self.cnn_arch.model_base_filename + '_pred_prob.npy');
+        print('np.array(self.predictions_prob).shape = ', np.array(self.predictions_prob).shape);
+        np.array(self.predictions_prob).dump(filepath);
+
+        filepath = os.path.join(self.output_dir, self.cnn_arch.model_base_filename + '_pred_binary.npy');
+        np.array(self.predictions_binary).astype(np.float).dump(filepath);
+
         self.test_data_provider.write_label_info(self.output_dir, self.cnn_arch.model_base_filename)
 
     #def output_predictions(self, batch_y, batch_label, correct_pred, datapoints_files_list):

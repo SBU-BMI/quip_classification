@@ -350,6 +350,15 @@ def load_model(config_filepath):
                 , kwargs = tester_params \
             );
             tester.init_model(do_init=True, do_restore=True);
+        elif(tester_class_name == 'ClassifierTesterExternalInputBinaryOutput'):
+            from ..sa_testers.sa_net_test_classifier_external_input_binary_output import ClassifierTesterExternalInputBinaryOutput;
+            tester = ClassifierTesterExternalInputBinaryOutput(cnn_arch \
+                , session_config=session_config \
+                , output_dir=tester_out_dir \
+                , output_ext=tester_out_ext \
+                , kwargs = tester_params \
+            );
+            tester.init_model(do_init=True, do_restore=True);
         else:
             print('error: tester class name \'{}\' is not supported by runner'.format(tester_class_name));
             sys.exit();        

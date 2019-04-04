@@ -29,9 +29,11 @@ def pred_by_external_model(model, inputs):
     #exp_pred = np.exp(pred - np.max(pred, axis=-1, keepdims=True) + 1)
     #return exp_pred[..., -1:] / np.sum(exp_pred, axis=-1, keepdims=True)
 
-    sig_pred = (1 / (1 + np.exp(-pred)))
-    sig_pred = sig_pred[..., -1:] ;
-    return sig_pred
+    #sig_pred = (1 / (1 + np.exp(-pred)))
+    #sig_pred = sig_pred[..., -1:] ;
+    #return sig_pred
+
+	return pred;
 
 if __name__ == "__main__":
     

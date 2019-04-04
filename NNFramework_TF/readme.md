@@ -40,12 +40,25 @@ If testing with super patches that should be divided in 8x8 sub patches use *cla
 set other training configuration values according to user preference, like batch size, learning rate, etc...  
 
 ##### TESTER section:
-**class_name:**  Use *ClassifierTesterExternalInput* if providing external input and not using a dataprovider (i.e. test data provider class name is set to 'None'), otherwise can use *ClassifierTesterSuperpatchBatch*.
-set other out_dir and batch_size  configuration values according to user preference. If testing with super patches that should be divided in 8x8 sub patches use batch_size =1
+**class_name:**  
+*ClassifierTesterExternalInput* :  if providing external input and not using a dataprovider (i.e. test data provider class name is set to 'None') and expected output is probability.  [Typically run using NNFramework_TF_external_call/external_model.py]
+
+*ClassifierTesterExternalInputBinaryOutput* :  if providing external input and not using a dataprovider (i.e. test data provider class name is set to 'None') and expected output is thresholded probability (i.e. binary) and set the threshold.  [Typically run using NNFramework_TF_external_call/external_model.py]
+
+*ClassifierTesterSuperpatchBatch*: Use with large patches that are further divided in sub-patches. Each row in the output will have the results of all the sub patches. Set batch_size =1 [Typically run using NNFramework_TF_external_call/external_train.py]
+
+*ClassifierTesterBatch*: Use otherwise [Typically run using NNFramework_TF_external_call/external_train.py]
+
+
+**out_dir:**  the location where test output files will be saved
+**batch_size:**  desired batch size. Set according to preference and tester class used
+If testing with super patches that should be divided in sub patches use batch_size =1
+**threshold:**  Set according to desired threshold for binary prediction output, default threshold = 0.5
 
 ### Customization:
 To create different classes such as for CNN architecture, dataprovider, trainer, or tester they should be supported by the runner file used to execute the training.  
-Current supported runner file is: *tf_classifier_runner.py*   and for external input (i.e. not using a data provider) use *tf_classifier_runner_external_input.py*
+Current supported runner file is: *tf_classifier_runner.py*   
+for external input (i.e. not using a data provider) use *tf_classifier_runner_external_input.py* 
 
 ### Libraries used:
 * Python 3.5 

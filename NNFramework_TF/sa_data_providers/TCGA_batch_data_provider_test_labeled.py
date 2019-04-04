@@ -93,9 +93,9 @@ class TCGABatchDataProviderTestLabelled(AbstractDataProvider):
 
         indx = 0;
         for file in self.data:
-            print(file);
+            #print(file);
             label_str = file[-5];
-            print(label_str);
+            #print(label_str);
             if(label_str == '0'):
                 label = 0;
             elif(label_str == '1'):
@@ -487,7 +487,7 @@ class TCGABatchDataProviderTestLabelled(AbstractDataProvider):
 
     def load_datapoint(self, indx):
         filepath = self.data[indx];
-        print(filepath);
+        #print(filepath);
         self.datapoints_files_list.append(filepath)
         #filename_queue = tf.train.string_input_producer([filepath]) #  list of files to read
 
@@ -497,7 +497,7 @@ class TCGABatchDataProviderTestLabelled(AbstractDataProvider):
         #img = tf.image.decode_png(value) # use png or jpg decoder based on your files.
         #print('filepath=', filepath)
         img = io.imread(filepath);
-        print(img.shape);
+        #print(img.shape);
         if(img.shape[2] > 3): # remove the alpha
             img = img[:,:,0:3];
         label_str = filepath[-5];
