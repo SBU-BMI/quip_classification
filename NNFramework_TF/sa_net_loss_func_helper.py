@@ -22,7 +22,7 @@ class CNNLossFuncHelper:
             logits=flat_logits \
             , targets=flat_labels \
             , pos_weight=class_weights \
-        ));
+        )));
 
     @staticmethod
     def cost_mse(logits, labels, class_weights, n_classes):
