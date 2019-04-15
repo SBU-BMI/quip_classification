@@ -49,7 +49,7 @@ class ClassifierTesterExternalInput:
             #print(np.array(batch_y).shape)
             #print(np.array(batch_y))
             #print(np.array(batch_y)[...,-1])
-            batch_y_sig = self.sigmoid(np.array(batch_y)[...,-1]);
+            batch_y_sig = self.sigmoid(np.array(batch_y)[...,-1]).reshape((-1,1));
             return batch_y_sig;
 
     def sigmoid(self, x):
