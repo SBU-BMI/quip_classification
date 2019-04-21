@@ -50,10 +50,15 @@ class ClassifierTesterExternalInputBinaryOutput:
                     , self.cnn_arch.isTest: True \
                 });
             batch_y_sig = self.sigmoid(np.array(batch_y)[...,-1]);
-            batch_y_binary = np.array(batch_y_sig > self.threshold).astype(np.float);
+            batch_y_binary = np.array(batch_y_sig > self.threshold).astype(np.float).reshape((-1,1));
 
             return batch_y_binary;
 
 
     def sigmoid(self, x):
         return (1 / (1 + np.exp(-x)))
+
+    def restart_model(self):
+        self.sess.close();
+        #tf.reset_default_graph();
+        self.init_model(True, True);
