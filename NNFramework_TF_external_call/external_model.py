@@ -33,7 +33,7 @@ def pred_by_external_model(model, inputs):
     #sig_pred = sig_pred[..., -1:] ;
     #return sig_pred
 
-	return pred;
+    return pred;
 
 if __name__ == "__main__":
     
@@ -53,9 +53,12 @@ if __name__ == "__main__":
     ## SKCM - semiauto - VGG16
     #config_filepath = "/home/shahira/NNFramework_TF_model_config/config_tcga_vgg16_b128_crop100_skcm_semiauto.ini";
     # SKCM - manual - InceptionV4
-    config_filepath = "/home/shahira/NNFramework_TF_model_config/config_tcga_incv4_b128_crop100_noBN_wd5e-4_d75_skcm_manual.ini";
+    #config_filepath = "/home/shahira/NNFramework_TF_model_config/config_tcga_incv4_b128_crop100_noBN_wd5e-4_d75_skcm_manual.ini";
     ## SKCM - manual - VGG16
     #config_filepath = "/home/shahira/NNFramework_TF_model_config/config_tcga_vgg16_b128_crop100_skcm_manual.ini";
+
+    config_filepath = "/home/shahira/quip_classification/NNFramework_TF/config/test_wsi_ext/config_vgg-semi_test_ext.ini";
+
 
     print(config_filepath)
     model = load_external_model(config_filepath);
@@ -65,3 +68,4 @@ if __name__ == "__main__":
     pred = pred_by_external_model(model, inputs)
     print('after predict')
     print(pred);
+    print(pred.shape);
