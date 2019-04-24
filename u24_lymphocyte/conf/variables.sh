@@ -6,8 +6,17 @@ DEFAULT_MPP=0.25
 CANCER_TYPE=quip
 MONGODB_HOST=osprey.bmi.stonybrook.edu
 MONGODB_PORT=27017
-HEATMAP_VERSION=lym_vgg_mix
-
+#HEATMAP_VERSION=lym_vgg_mix
+if [[ -n $HEATMAP_VERSION_NAME ]]; then
+	HEATMAP_VERSION=$HEATMAP_VERSION_NAME ;
+else
+	HEATMAP_VERSION=lym_vgg-mix ;
+fi
+if [[ -n $BINARY_HEATMAP_VERSION_NAME ]]; then
+	BINARY_HEATMAP_VERSION=$BINARY_HEATMAP_VERSION_NAME ;
+else
+	BINARY_HEATMAP_VERSION=lym_vgg-mix_binary ;
+fi
 # Base directory
 BASE_DIR=/root/u24_lymphocyte/
 
@@ -18,7 +27,9 @@ CASE_LIST=${BASE_DIR}/data/raw_marking_to_download_case_list/case_list.txt
 
 # Paths of data, log, input, and output
 JSON_OUTPUT_FOLDER=${BASE_DIR}/data/heatmap_jsons
+BINARY_JSON_OUTPUT_FOLDER=${BASE_DIR}/data/heatmap_jsons_binary
 HEATMAP_TXT_OUTPUT_FOLDER=${BASE_DIR}/data/heatmap_txt
+BINARY_HEATMAP_TXT_OUTPUT_FOLDER=${BASE_DIR}/data/heatmap_txt_binary
 LOG_OUTPUT_FOLDER=${BASE_DIR}/data/log
 SVS_INPUT_PATH=${BASE_DIR}/data/svs
 PATCH_PATH=${BASE_DIR}/data/patches
