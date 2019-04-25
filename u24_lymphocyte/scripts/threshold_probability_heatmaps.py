@@ -14,13 +14,14 @@ def edit_json(json_folder_path, out_dir, threshold, suffix = None, new_heatmap_v
     if(suffix is None and new_heatmap_version_name is None):
         return False;
 
-    # Create the output folder
-    if(new_heatmap_version_name is None):
-        folder_name = json_folder_path.split('/')[-1] + suffix;
-    else:
-        folder_name = new_heatmap_version_name;
+    ## Create the output folder
+    #if(new_heatmap_version_name is None):
+    #    folder_name = json_folder_path.split('/')[-1] + suffix;
+    #else:
+    #    folder_name = new_heatmap_version_name;
+    #dest_dir = os.path.join(out_dir, folder_name );
+    dest_dir = out_dir;
 
-    dest_dir = os.path.join(out_dir, folder_name );
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir);
 
@@ -113,13 +114,14 @@ def edit_prediction_txt(heatmap_txt_folder_path, out_dir, threshold, suffix = No
     if(suffix is None and new_heatmap_version_name is None):
         return False;
 
-    # Create the output folder
-    if(new_heatmap_version_name is None):
-        folder_name = heatmap_txt_folder_path.split('/')[-1] + suffix;
-    else:
-        folder_name = new_heatmap_version_name;
+    ## Create the output folder
+    #if(new_heatmap_version_name is None):
+    #    folder_name = heatmap_txt_folder_path.split('/')[-1] + suffix;
+    #else:
+    #    folder_name = new_heatmap_version_name;
+    #dest_dir = os.path.join(out_dir, folder_name );
+    dest_dir = out_dir;
 
-    dest_dir = os.path.join(out_dir, folder_name );
     if not os.path.exists(dest_dir):
         os.makedirs(dest_dir);
 
