@@ -18,7 +18,7 @@ else
 	BINARY_HEATMAP_VERSION=lym_vgg-mix_binary ;
 fi
 # Base directory
-BASE_DIR=/root/u24_lymphocyte/
+BASE_DIR=/root/quip_classification/u24_lymphocyte/
 
 # The username you want to download heatmaps from
 USERNAME=john.vanarnam@gmail.com
