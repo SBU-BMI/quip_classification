@@ -11,6 +11,8 @@ fi
 
 source ./conf/variables.sh
 
+cd ./scripts
+
 python threshold_probability_heatmaps.py $JSON_OUTPUT_FOLDER  $BINARY_JSON_OUTPUT_FOLDER  $HEATMAP_TXT_OUTPUT_FOLDER  $BINARY_HEATMAP_TXT_OUTPUT_FOLDER   $LYM_NECRO_CNN_MODEL_PATH  $BINARY_HEATMAP_VERSION
 
 
