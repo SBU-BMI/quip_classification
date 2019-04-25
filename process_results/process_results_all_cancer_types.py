@@ -3,7 +3,7 @@ import pickle;
 import os;
 import sys;
 from sklearn import metrics 
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from shutil import copyfile;
 import glob;
 
@@ -25,11 +25,21 @@ def process_results_separate_types(in_dir, out_dir, model_prefix, threshold):
         print(ctype);
         result_files_prefix = os.path.join(in_dir, ctype, model_prefix);
         lbl = np.load(result_files_prefix + '_individual_labels.npy');        
-        pred = np.load(result_files_prefix + '_pred_new.npy');
+        #pred = np.load(result_files_prefix + '_pred_new.npy');
+        if(os.path.isfile(result_files_prefix + '_pred_new.npy')):
+            pred = np.load(result_files_prefix + '_pred_new.npy');
+        elif(os.path.isfile(result_files_prefix + '_pred_prob.npy')):
+            pred = np.load(result_files_prefix + '_pred_prob.npy');    
         filenames = pickle.load(open(result_files_prefix + '_filename.pkl', "rb"));
         filenames = np.array(filenames);
         pred = pred.squeeze();
-        pred_t1 = pred[:,1];
+        #pred_t1 = pred[:,1];
+        if(len(pred.shape) > 1 and pred.shape[1]>1):
+            pred_t1 = pred[:,1];
+        elif(len(pred.shape) > 1 and pred.shape[1]==1):
+            pred_t1 = pred[:,0];
+        elif(len(pred.shape) == 1):
+            pred_t1 = pred;
         count = lbl.shape[0];
         P = lbl[np.where(pred_t1 > threshold)].shape[0]
         TP = lbl[np.where(pred_t1 > threshold)].sum();
@@ -223,10 +233,18 @@ def process_results(in_dir, out_dir, model_prefix, dataset_name, threshold):
     out_file.write(model_prefix+'\n\n');
     result_files_prefix = os.path.join(in_dir, model_prefix);
     lbl = np.load(result_files_prefix + '_individual_labels.npy');
-    pred = np.load(result_files_prefix + '_pred_new.npy');
-    pred = pred.squeeze();
+    if(os.path.isfile(result_files_prefix + '_pred_new.npy')):
+        pred = np.load(result_files_prefix + '_pred_new.npy');
+    elif(os.path.isfile(result_files_prefix + '_pred_prob.npy')):
+        pred = np.load(result_files_prefix + '_pred_prob.npy');    
+    pred = pred.squeeze();    
     print('pred.shape = ', pred.shape);
-    pred_t1 = pred[:,1];
+    if(len(pred.shape) > 1 and pred.shape[1]>1):
+        pred_t1 = pred[:,1];
+    elif(len(pred.shape) > 1 and pred.shape[1]==1):
+        pred_t1 = pred[:,0];
+    elif(len(pred.shape) == 1):
+        pred_t1 = pred;
     count = lbl.shape[0];
     P = lbl[np.where(pred_t1 > threshold)].shape[0]
     TP = lbl[np.where(pred_t1 > threshold)].sum();
@@ -331,11 +349,21 @@ def process_results_separate_types_auc(in_dir, out_dir, model_prefix):
         print(ctype);
         result_files_prefix = os.path.join(in_dir, ctype, model_prefix);
         lbl = np.load(result_files_prefix + '_individual_labels.npy');
-        pred = np.load(result_files_prefix + '_pred_new.npy');
+        #pred = np.load(result_files_prefix + '_pred_new.npy');
+        if(os.path.isfile(result_files_prefix + '_pred_new.npy')):
+            pred = np.load(result_files_prefix + '_pred_new.npy');
+        elif(os.path.isfile(result_files_prefix + '_pred_prob.npy')):
+            pred = np.load(result_files_prefix + '_pred_prob.npy');    
         filenames = pickle.load(open(result_files_prefix + '_filename.pkl', "rb"));
         filenames = np.array(filenames);
         pred = pred.squeeze();
-        pred_t1 = pred[:,1];
+        #pred_t1 = pred[:,1];
+        if(len(pred.shape) > 1 and pred.shape[1]>1):
+            pred_t1 = pred[:,1];
+        elif(len(pred.shape) > 1 and pred.shape[1]==1):
+            pred_t1 = pred[:,0];
+        elif(len(pred.shape) == 1):
+            pred_t1 = pred;
         if(pred_all_t1 is None):
             pred_all_t1 = pred_t1;
             lbl_all = lbl;
@@ -578,9 +606,9 @@ if __name__ == "__main__":
     #in_dir = "/pylon5/ac3uump/shahira/tcga/test_out/all_ctypes/luad_additional+";
     #out_dir = "/pylon5/ac3uump/shahira/tcga/test_out/all_ctypes/luad_additional+";
     #dataset_name = "luad_additional+";
-    in_dir = "/pylon5/ac3uump/shahira/tcga/test_out/all_ctypes/brca_additional+";
-    out_dir = "/pylon5/ac3uump/shahira/tcga/test_out/all_ctypes/brca_additional+";
-    dataset_name = "brca_additional+";
+    #in_dir = "/pylon5/ac3uump/shahira/tcga/test_out/all_ctypes/brca_additional+";
+    #out_dir = "/pylon5/ac3uump/shahira/tcga/test_out/all_ctypes/brca_additional+";
+    #dataset_name = "brca_additional+";
 
     #threshold = 0.5;
 
@@ -703,9 +731,21 @@ if __name__ == "__main__":
     #model_prefix = "baseline2"; # cutoff_youden = 0.26 
     #threshold = 0.26;# youden
 
+    #model_prefix = "menndel"; #youden = 0.258 = cutoff_distance 
+    #threshold = 0.5;
+    ##threshold = 0.26; # youden
+
+    #model_prefix = "menndel_v2"; # cutoff_youden =  0.1794 cutoff_distance =  0.1794
+    ##threshold = 0.5;
+    #threshold = 0.18; # youden
+
+    model_prefix = "vgg-context"; # cutoff_youden =  0.44101143 cutoff_distance =  0.44101143
+    #threshold = 0.5;
+    threshold = 0.44; # youden
+
     ###print(threshold )
-    process_results(in_dir, out_dir, model_prefix, dataset_name, threshold);
-    #process_results_separate_types(in_dir, out_dir, model_prefix, threshold);
+    #process_results(in_dir, out_dir, model_prefix, dataset_name, threshold);
+    process_results_separate_types(in_dir, out_dir, model_prefix, threshold);
     ##process_results_separate_types_sm(in_dir, out_dir, model_prefix, threshold);
     #process_results_separate_types_auc(in_dir, out_dir, model_prefix);
 

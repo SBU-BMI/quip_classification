@@ -67,9 +67,21 @@ def process_results_violin(in_dir, out_dir, model_prefix, dataset_name, threshol
     result_files_prefix = os.path.join(in_dir, model_prefix );
     out_files_prefix = os.path.join(in_dir, model_prefix + '_'+dataset_name);
     lbl = np.load(result_files_prefix + '_individual_labels.npy');
-    pred = np.load(result_files_prefix + '_pred_new.npy');
+    #pred = np.load(result_files_prefix + '_pred_new.npy');
+    if(os.path.isfile(result_files_prefix + '_pred_new.npy')):
+        pred = np.load(result_files_prefix + '_pred_new.npy');
+    elif(os.path.isfile(result_files_prefix + '_pred_prob.npy')):
+        pred = np.load(result_files_prefix + '_pred_prob.npy');    
+    #print('pred.shape = ', pred.shape)
     pred= pred.squeeze();
-    pred = pred[:,:,1] ;
+    #print('pred.shape = ', pred.shape)
+    #pred = pred[:,:,1] ;
+    if(len(pred.shape) > 2 and pred.shape[2]>1):
+        pred = pred[:,:,1];
+    elif(len(pred.shape) > 2 and pred.shape[2]==1):
+        pred = pred[:,:,0];
+    elif(len(pred.shape) == 2):
+        pred = pred;
     if(not (exclude_ctype is None)):
         ctype = pickle.load(open(result_files_prefix + '_cancer_type.pkl', 'rb'));
         ctype = np.array(ctype);
@@ -96,6 +108,10 @@ def process_results_violin(in_dir, out_dir, model_prefix, dataset_name, threshol
     pred_n1 = pred_n[np.where(lbl2 == 1)]
     pred_n2 = pred_n[np.where(lbl2 == 2)]
     pred_n3 = pred_n[np.where(lbl2 == 3)]
+
+    #print(pred_n1) ;
+    #print(np.where(lbl2 == 1)) ;
+    #print(lbl[np.where(lbl2 == 1)]) ;
 
     if(plot_type == 0 or plot_type == 1 or plot_type == 2):
         if(not(0 in pred_n1)):
@@ -138,12 +154,22 @@ def process_results_violin(in_dir, out_dir, model_prefix, dataset_name, threshol
 def save_n_pred_pos(in_dir, model_prefix, threshold):
 
     result_files_prefix = os.path.join(in_dir, model_prefix );
-    pred = np.load(result_files_prefix + '_pred_new.npy');
+    #pred = np.load(result_files_prefix + '_pred_new.npy');
+    if(os.path.isfile(result_files_prefix + '_pred_new.npy')):
+        pred = np.load(result_files_prefix + '_pred_new.npy');
+    elif(os.path.isfile(result_files_prefix + '_pred_prob.npy')):
+        pred = np.load(result_files_prefix + '_pred_prob.npy');    
 
     # get the sub patches that are predicted positive according to threshold
     # the pred is super patch -> sub patch -> logit neg, logit pos
     pred= pred.squeeze();
-    pred = pred[:,:,1] ;
+    #pred = pred[:,:,1] ;
+    if(len(pred.shape) > 2 and pred.shape[2]>1):
+        pred = pred[:,:,1];
+    elif(len(pred.shape) > 2 and pred.shape[2]==1):
+        pred = pred[:,:,0];
+    elif(len(pred.shape) == 2):
+        pred = pred;
     pred_b = pred > threshold ;
 
     # get the number of subpatches predicted positive in each superpatch
@@ -366,9 +392,9 @@ if __name__ == "__main__":
     #model_prefix = "tcga_vgg16_2class_adam_b128_CEloss_lr5e-5_crop100_val-strat_all_manual_e5"; # cutoff_youden =  0.42531168, cutoff_distance =  0.3960078
     ##threshold = 0.5;
     #threshold = 0.43;# youden
-    model_prefix = "tcga_incv4_2class_adam_b128_CEloss_lr5e-5_crop100_noBN_d75_val-strat_all_manual_e4"; # cutoff_youden =  0.4241887, cutoff_distance =  0.35299426
-    #threshold = 0.5;
-    threshold = 0.42;# youden
+    #model_prefix = "tcga_incv4_2class_adam_b128_CEloss_lr5e-5_crop100_noBN_d75_val-strat_all_manual_e4"; # cutoff_youden =  0.4241887, cutoff_distance =  0.35299426
+    ##threshold = 0.5;
+    #threshold = 0.42;# youden
     #model_prefix = "tcga_vgg16_2class_adam_b128_CEloss_lr5e-5_crop100_val-strat_all_semi_e0"; # cutoff_youden = 0.6106335 cutoff_distance = 0.6106335 auc = 0.9433193297600078
     ##threshold = 0.5;
     #threshold = 0.61;# youden
@@ -443,6 +469,14 @@ if __name__ == "__main__":
     #model_prefix = "tcga_vgg16_b128_CEloss_lr5e-5_crop100_val-strat_mysubset_e2"; # cutoff_youden =  0.5456139
     ##threshold = 0.5;
     #threshold = 0.55;# youden
+
+    #model_prefix = "menndel"; 
+    #threshold = 0.5;
+    ##threshold = 0.26; #youden = 0.258
+
+    model_prefix = "menndel_v2"; 
+    #threshold = 0.5;
+    threshold = 0.18; #youden
 
     #plot_type = 0;
     #plot_type = 1;
