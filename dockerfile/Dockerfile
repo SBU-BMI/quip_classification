@@ -1,28 +1,20 @@
 FROM	nvcr.io/nvidia/tensorflow:18.11-py3
-MAINTAINER Test Person 
+MAINTAINER test 
 
 RUN 	apt-get -y update && \
-	apt -y install python3-pip && \
-	pip install openslide-python && \
-	apt-get -y install openslide-tools && \
-	pip install scikit-image && \
-	pip install pymongo 
+	apt -y install python3-pip openslide-tools wget && \
+	pip install openslide-python scikit-image pymongo 
 
 WORKDIR /root
 
-# This will clone SBU-BMI/u24_lymphocyte and SBU-BMI/quip_classification 
-# repositories to /root.
-# We need to add steps to clone and install codes from SBU-BMI/quip_classification
-# and to copy scripts to common locations (eg. /usr/bin, /usr/local/bin) for execution
-RUN	git clone https://github.com/SBU-BMI/quip_classification
+RUN	git clone https://github.com/SBU-BMI/quip_classification && \
+	cd /root/quip_classification/u24_lymphocyte/prediction/NNFramework_TF_models && \
+	wget -v -O models.zip -L https://stonybrookmedicine.box.com/shared/static/jr6t55nvyikow0nasudc0u40bion7rsg.zip && \
+        unzip -o models.zip && rm -f models.zip && \
+	cd /root/quip_classification/u24_lymphocyte/scripts && chmod 0755 *
 
-ENV        BASE_DIR=/root/quip_classification/u24_lymphocyte
-#COPY       ../../TIL_models/NNFramework_TF_models/ root/quip_classification/u24_lymphocyte/prediction
-ONBUILD    COPY   root/quip_classification/u24_lymphocyte/scripts/svs_2_heatmap.sh /usr/local/bin
-
-# COPY     $BASE_DIR/scripts/patch_2_heatmap.sh  /usr/local/bin
-# COPY     $BASE_DIR/scripts/threshold_probability_heatmaps.sh /usr/local/bin
-# COPY     $BASE_DIR/scripts/cleanup_heatmap.sh /usr/local/bin
-
+ENV	BASE_DIR="/root/quip_classification/u24_lymphocyte"
+ENV	PATH="./":$PATH
+WORKDIR /root/quip_classification/u24_lymphocyte/scripts
 
 CMD ["/bin/bash"]
