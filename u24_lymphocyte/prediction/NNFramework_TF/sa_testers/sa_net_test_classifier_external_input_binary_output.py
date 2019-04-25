@@ -57,3 +57,8 @@ class ClassifierTesterExternalInputBinaryOutput:
 
     def sigmoid(self, x):
         return (1 / (1 + np.exp(-x)))
+
+    def restart_model(self):
+        self.sess.close();
+        #tf.reset_default_graph();
+        self.init_model(True, True);
