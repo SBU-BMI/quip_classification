@@ -173,12 +173,12 @@ def get_threshold_from_config(config_filepath):
 
 if __name__ == "__main__":
 
-    in_dir_json = sys.argv[2];
-    out_dir_json = sys.argv[3];
-    in_dir_txt = sys.argv[4];
-    out_dir_txt = sys.argv[5];
-    config_filepath = sys.argv[6];
-    new_heatmap_version_name = sys.argv[7];
+    in_dir_json = sys.argv[1];
+    out_dir_json = sys.argv[2];
+    in_dir_txt = sys.argv[3];
+    out_dir_txt = sys.argv[4];
+    config_filepath = sys.argv[5];
+    new_heatmap_version_name = sys.argv[6];
 
     threshold = get_threshold_from_config(config_filepath);
 
