@@ -1,6 +1,10 @@
 #!/bin/bash
 
-cd ../
+if [[ -n $BASE_DIR ]]; then
+	cd $BASE_DIR
+else
+	cd ../
+fi
 source ./conf/variables.sh
 
 
