@@ -1,12 +1,19 @@
 #!/bin/bash
 
-cd ../
+if [[ -n $BASE_DIR ]]; then
+	cd $BASE_DIR
+else
+	cd ../
+fi
+
 source ./conf/variables.sh
 
 in_dir=${BASE_DIR}
 
 rm ${HEATMAP_TXT_OUTPUT_FOLDER}/*
 rm ${JSON_OUTPUT_FOLDER}/*
+rm ${BINARY_HEATMAP_TXT_OUTPUT_FOLDER}/*
+rm ${BINARY_JSON_OUTPUT_FOLDER}/*
 
 delete_pattern=patch-level-lym.txt
 for folder in ${PATCH_PATH}/*; do
