@@ -1,6 +1,8 @@
 FROM	nvcr.io/nvidia/tensorflow:18.11-py3
 MAINTAINER test 
 
+ENTRYPOINT []
+
 RUN 	apt-get -y update && \
 	apt -y install python3-pip openslide-tools wget && \
 	pip install openslide-python scikit-image pymongo 
