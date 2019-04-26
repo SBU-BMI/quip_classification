@@ -10,8 +10,8 @@ quip_classification/dockerfile
 2. Run the docker build command:
 docker build -t til_pipeline .
 
-### Run the docker:
-#### Required Folders Description:
+### Running the docker:
+#### 1. Required Folders Description:
 **svs:** This folder will hold the .svs files to be processed.  
 **patches:** This tiled whole slide image patches will be placed in this folder. After the patch extraction step it will contain subfolders with the filenames of the svs files extracted. The patches will be re-used when run on the same svs file multiple times. Otherwise can be deleted to save space.  
 **heatmap_txt:** This will hold the text formatted output predictions.  
@@ -20,7 +20,7 @@ docker build -t til_pipeline .
 **heatmap_json_binary:** This will hold the json formatted binary (thresholded) predictions.  
 **log:** This folder will hold the output log files.  
 
-#### Required Environment Variable Settings:
+#### 2. Required Environment Variable Settings:
 **MODEL_CONFIG_FILENAME:** The name of the model configuration file. There are 2 main configurations available:  
 *config_incep-mix_test_ext.ini:* The inception-v4 model trained on mix of manual and semi-autoamted labels each from a different set of cancer types.  
 *config_vgg-mix_test_ext.ini:* The vgg-16 model trained on mix of manual and semi-autoamted labels each from a different set of cancer types.  
@@ -32,26 +32,26 @@ docker build -t til_pipeline .
 **BINARY_HEATMAP_VERSION_NAME:** The version name given to the set of binary (thresholded) predictions.  
 
 
-#### Command to Execute:
+#### 3. Command to Execute:
 There are several scripts that are useful for generating predictions heatmaps from whole slide images. Replace the placeholder *{Command}* with any of the script filenames :
 
-1. cleanup_heatmap.sh
+a. cleanup_heatmap.sh
 Predictions are re-used if available. You can skip this step if you are only continuing the prediction without changing the model configuration. 
 To create new predictions on the same svs files (probably using a different model) it is important to clean the previously generated predictions before performing running again using another model. This script also cleans the log folder.
 
-2. svs_2_heatmap.sh:
+b. svs_2_heatmap.sh:
 Runs the heatmap generation *including* patch extraction (tiling)
 
-3. patch_2_heatmap.sh:
+c. patch_2_heatmap.sh:
 Runs the heatmap generation *excluding* patch extraction (tiling)
 
-4. threshold_probability_heatmaps.sh:
+d. threshold_probability_heatmaps.sh:
 Creates binary predictions probability maps using the predefined thresholds saved in the model configuration file.
 
 
   
 
-#### To Run the Docker:
+#### 4. Execute:
 Run the below command replacing the {placeholders} with appropriate settings:  
 
 nvidia-docker run --name test_til_pipeline  -it \\  
