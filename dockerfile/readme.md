@@ -52,36 +52,37 @@ Creates binary predictions probability maps using the predefined thresholds save
   
 
 #### To Run the Docker:
-Run the below command replacing the {placeholders} with appropriate settings:
-nvidia-docker run --name test_til_pipeline  -it \
--v *{svs folder path}*:/root/quip_classification/u24_lymphocyte/data/svs  \
--v *{patches folder path}*:/root/quip_classification/u24_lymphocyte/data/patches   \
--v *{heatmap_txt folder path}*:/root/quip_classification/u24_lymphocyte/data/heatmap_txt   \
--v *{heatmap_jsons folder path}*:/root/quip_classification/u24_lymphocyte/data/heatmap_jsons   \
--v *{binary_heatmap_txt folder path}*:/root/quip_classification/u24_lymphocyte/data/heatmap_txt_binary   \
--v *{binary_heatmap_jsons folder path}*:/root/quip_classification/u24_lymphocyte/data/heatmap_jsons_binary   \
--v *{log folder path}*:/root/quip_classification/u24_lymphocyte/data/log
--e MODEL_CONFIG_FILENAME='*{model config file name}*'  \
--e CUDA_VISIBLE_DEVICES='*{GPU ID}*'  \
--e HEATMAP_VERSION_NAME='*{heatmap version name}*'  \
--e BINARY_HEATMAP_VERSION_NAME='*{heatmap version name}*'  \
+Run the below command replacing the {placeholders} with appropriate settings:  
+
+nvidia-docker run --name test_til_pipeline  -it \\  
+-v *{svs folder path}*:/root/quip_classification/u24_lymphocyte/data/svs  \\  
+-v *{patches folder path}*:/root/quip_classification/u24_lymphocyte/data/patches   \\  
+-v *{heatmap_txt folder path}*:/root/quip_classification/u24_lymphocyte/data/heatmap_txt   \\  
+-v *{heatmap_jsons folder path}*:/root/quip_classification/u24_lymphocyte/data/heatmap_jsons   \\  
+-v *{binary_heatmap_txt folder path}*:/root/quip_classification/u24_lymphocyte/data/heatmap_txt_binary   \\  
+-v *{binary_heatmap_jsons folder path}*:/root/quip_classification/u24_lymphocyte/data/heatmap_jsons_binary   \\  
+-v *{log folder path}*:/root/quip_classification/u24_lymphocyte/data/log \\  
+-e MODEL_CONFIG_FILENAME='*{model config file name}*'  \\  
+-e CUDA_VISIBLE_DEVICES='*{GPU ID}*'  \\  
+-e HEATMAP_VERSION_NAME='*{heatmap version name}*'  \\  
+-e BINARY_HEATMAP_VERSION_NAME='*{heatmap version name}*'  \\  
 -d til_pipeline:latest  *{Command}*
  
 
 **This is an example command with some settings:**  
 
-nvidia-docker run --name til_pipeline --rm -it \
--v /nfs/bigbrain/shahira/svs:/root/quip_classification/u24_lymphocyte/data/svs  \
--v  /nfs/bigbrain/shahira/patches:/root/quip_classification/u24_lymphocyte/data/patches   \
--v  /nfs/bigbrain/shahira/til_output/heatmap_txt:/root/quip_classification/u24_lymphocyte/data/heatmap_txt   \
--v  /nfs/bigbrain/shahira/til_output/heatmap_json:/root/quip_classification/u24_lymphocyte/data/heatmap_jsons   \
--v  /nfs/bigbrain/shahira/til_output/heatmap_txt_binary:/root/quip_classification/u24_lymphocyte/data/heatmap_txt_binary   \
--v  /nfs/bigbrain/shahira/til_output/heatmap_json_binary:/root/quip_classification/u24_lymphocyte/data/heatmap_jsons_binary   \
--v  /nfs/bigbrain/shahira/til_output/log:/root/quip_classification/u24_lymphocyte/data/log \
--e MODEL_CONFIG_FILENAME='config_incep-mix_test_ext.ini'  \
--e CUDA_VISIBLE_DEVICES='0'  \
--e HEATMAP_VERSION_NAME='lym_vgg-mix_probability'  \
--e BINARY_HEATMAP_VERSION_NAME='lym_vgg-mix_binary'  \
--d til_pipeline:latest \
+nvidia-docker run --name til_pipeline --rm -it \\  
+-v /nfs/bigbrain/shahira/svs:/root/quip_classification/u24_lymphocyte/data/svs  \\  
+-v  /nfs/bigbrain/shahira/patches:/root/quip_classification/u24_lymphocyte/data/patches   \\  
+-v  /nfs/bigbrain/shahira/til_output/heatmap_txt:/root/quip_classification/u24_lymphocyte/data/heatmap_txt   \\  
+-v  /nfs/bigbrain/shahira/til_output/heatmap_json:/root/quip_classification/u24_lymphocyte/data/heatmap_jsons   \\  
+-v  /nfs/bigbrain/shahira/til_output/heatmap_txt_binary:/root/quip_classification/u24_lymphocyte/data/heatmap_txt_binary   \\  
+-v  /nfs/bigbrain/shahira/til_output/heatmap_json_binary:/root/quip_classification/u24_lymphocyte/data/heatmap_jsons_binary   \\  
+-v  /nfs/bigbrain/shahira/til_output/log:/root/quip_classification/u24_lymphocyte/data/log \\  
+-e MODEL_CONFIG_FILENAME='config_incep-mix_test_ext.ini'  \\  
+-e CUDA_VISIBLE_DEVICES='0'  \\  
+-e HEATMAP_VERSION_NAME='lym_vgg-mix_probability'  \\  
+-e BINARY_HEATMAP_VERSION_NAME='lym_vgg-mix_binary'  \\  
+-d til_pipeline:latest \\  
 svs_2_heatmap.sh
 
