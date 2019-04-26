@@ -14,6 +14,7 @@ rm ${HEATMAP_TXT_OUTPUT_FOLDER}/*
 rm ${JSON_OUTPUT_FOLDER}/*
 rm ${BINARY_HEATMAP_TXT_OUTPUT_FOLDER}/*
 rm ${BINARY_JSON_OUTPUT_FOLDER}/*
+rm ${LOG_OUTPUT_FOLDER}/*
 
 delete_pattern=patch-level-lym.txt
 for folder in ${PATCH_PATH}/*; do
