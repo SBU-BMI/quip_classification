@@ -13,13 +13,13 @@ docker build -t til_pipeline .
 ### Running the docker:
 #### 1. Required Folders Description:
 **svs:** This folder will hold the .svs files to be processed.  
-**patches:** The tiled whole slide image patches will be placed in this folder. After the patch extraction step it will contain subfolders with the filenames of the svs files extracted. The patches will be re-used when run on the same svs file multiple times. Otherwise can be deleted to save space.
-**output:** This folder will hold the log and final output folders. The pipeline will create the following subfolders to hold the output: 
-  *heatmap_txt:* will contain the text formatted output predictions.
-  *heatmap_jsons:* will contain the json formatted output predictions. 
-  *heatmap_txt_binary:* will contain the text formatted binary (thresholded) predictions. 
-  *heatmap_json_binary:* will contain the json formatted binary (thresholded) predictions. 
-  *log:* will contain the output log files. 
+**patches:** The tiled whole slide image patches will be placed in this folder. After the patch extraction step it will contain subfolders with the filenames of the svs files extracted. The patches will be re-used when run on the same svs file multiple times. Otherwise can be deleted to save space.  
+**output:** This folder will hold the log and final output folders. The pipeline will create the following subfolders to hold the output:  
+  *heatmap_txt:* will contain the text formatted output predictions.  
+  *heatmap_jsons:* will contain the json formatted output predictions.  
+  *heatmap_txt_binary:* will contain the text formatted binary (thresholded) predictions.   
+  *heatmap_json_binary:* will contain the json formatted binary (thresholded) predictions.  
+  *log:* will contain the output log files.  
 
 #### 2. Required Environment Variable Settings:
 **MODEL_CONFIG_FILENAME:** The name of the model configuration file. There are 2 main configurations available:  
