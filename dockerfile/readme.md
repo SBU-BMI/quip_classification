@@ -13,17 +13,18 @@ docker build -t til_pipeline .
 ### Running the docker:
 #### 1. Required Folders Description:
 **svs:** This folder will hold the .svs files to be processed.  
-**patches:** This tiled whole slide image patches will be placed in this folder. After the patch extraction step it will contain subfolders with the filenames of the svs files extracted. The patches will be re-used when run on the same svs file multiple times. Otherwise can be deleted to save space.  
-**heatmap_txt:** This will hold the text formatted output predictions.  
-**heatmap_jsons:** This will hold the json formatted output predictions.  
-**heatmap_txt_binary:** This will hold the text formatted binary (thresholded) predictions.  
-**heatmap_json_binary:** This will hold the json formatted binary (thresholded) predictions.  
-**log:** This folder will hold the output log files.  
+**patches:** The tiled whole slide image patches will be placed in this folder. After the patch extraction step it will contain subfolders with the filenames of the svs files extracted. The patches will be re-used when run on the same svs file multiple times. Otherwise can be deleted to save space.
+**output:** This folder will hold the log and final output folders. The pipeline will create the following subfolders to hold the output: 
+  *heatmap_txt:* will contain the text formatted output predictions.
+  *heatmap_jsons:* will contain the json formatted output predictions. 
+  *heatmap_txt_binary:* will contain the text formatted binary (thresholded) predictions. 
+  *heatmap_json_binary:* will contain the json formatted binary (thresholded) predictions. 
+  *log:* will contain the output log files. 
 
 #### 2. Required Environment Variable Settings:
 **MODEL_CONFIG_FILENAME:** The name of the model configuration file. There are 2 main configurations available:  
-*config_incep-mix_test_ext.ini:* The inception-v4 model trained on mix of manual and semi-autoamted labels each from a different set of cancer types.  
-*config_vgg-mix_test_ext.ini:* The vgg-16 model trained on mix of manual and semi-autoamted labels each from a different set of cancer types.  
+  *config_incep-mix_test_ext.ini:* The inception-v4 model trained on mix of manual and semi-autoamted labels each from a different set of cancer types.  
+  *config_vgg-mix_test_ext.ini:* The vgg-16 model trained on mix of manual and semi-autoamted labels each from a different set of cancer types.  
 
 **CUDA_VISIBLE_DEVICES:** The gpu device to use. Default is '0'.  
 
@@ -57,11 +58,7 @@ Run the below command replacing the {placeholders} with appropriate settings:
 nvidia-docker run --name test_til_pipeline  -it \\  
 -v *{svs folder path}*:/root/quip_classification/u24_lymphocyte/data/svs  \\  
 -v *{patches folder path}*:/root/quip_classification/u24_lymphocyte/data/patches   \\  
--v *{heatmap_txt folder path}*:/root/quip_classification/u24_lymphocyte/data/heatmap_txt   \\  
--v *{heatmap_jsons folder path}*:/root/quip_classification/u24_lymphocyte/data/heatmap_jsons   \\  
--v *{binary_heatmap_txt folder path}*:/root/quip_classification/u24_lymphocyte/data/heatmap_txt_binary   \\  
--v *{binary_heatmap_jsons folder path}*:/root/quip_classification/u24_lymphocyte/data/heatmap_jsons_binary   \\  
--v *{log folder path}*:/root/quip_classification/u24_lymphocyte/data/log \\  
+-v *{output folder path}*:/root/quip_classification/u24_lymphocyte/data/output   \\  
 -e MODEL_CONFIG_FILENAME='*{model config file name}*'  \\  
 -e CUDA_VISIBLE_DEVICES='*{GPU ID}*'  \\  
 -e HEATMAP_VERSION_NAME='*{heatmap version name}*'  \\  
@@ -74,12 +71,8 @@ nvidia-docker run --name test_til_pipeline  -it \\
 nvidia-docker run --name til_pipeline --rm -it \\  
 -v /nfs/bigbrain/shahira/svs:/root/quip_classification/u24_lymphocyte/data/svs  \\  
 -v  /nfs/bigbrain/shahira/patches:/root/quip_classification/u24_lymphocyte/data/patches   \\  
--v  /nfs/bigbrain/shahira/til_output/heatmap_txt:/root/quip_classification/u24_lymphocyte/data/heatmap_txt   \\  
--v  /nfs/bigbrain/shahira/til_output/heatmap_json:/root/quip_classification/u24_lymphocyte/data/heatmap_jsons   \\  
--v  /nfs/bigbrain/shahira/til_output/heatmap_txt_binary:/root/quip_classification/u24_lymphocyte/data/heatmap_txt_binary   \\  
--v  /nfs/bigbrain/shahira/til_output/heatmap_json_binary:/root/quip_classification/u24_lymphocyte/data/heatmap_jsons_binary   \\  
--v  /nfs/bigbrain/shahira/til_output/log:/root/quip_classification/u24_lymphocyte/data/log \\  
--e MODEL_CONFIG_FILENAME='config_incep-mix_test_ext.ini'  \\  
+-v  /nfs/bigbrain/shahira/til_output:/root/quip_classification/u24_lymphocyte/data/output   \\  
+-e MODEL_CONFIG_FILENAME='config_vgg-mix_test_ext.ini'  \\  
 -e CUDA_VISIBLE_DEVICES='0'  \\  
 -e HEATMAP_VERSION_NAME='lym_vgg-mix_probability'  \\  
 -e BINARY_HEATMAP_VERSION_NAME='lym_vgg-mix_binary'  \\  
