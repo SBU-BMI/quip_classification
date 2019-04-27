@@ -36,17 +36,17 @@ docker build -t til_pipeline .
 #### 3. Command to Execute:
 There are several scripts that are useful for generating predictions heatmaps from whole slide images. Replace the placeholder *{Command}* with any of the script filenames :
 
-a. cleanup_heatmap.sh
-Predictions are re-used if available. You can skip this step if you are only continuing the prediction without changing the model configuration. 
+a. **cleanup_heatmap.sh**  
+Predictions are re-used if available. You can skip this step if you are only continuing the prediction without changing the model configuration.  
 To create new predictions on the same svs files (probably using a different model) it is important to clean the previously generated predictions before performing running again using another model. This script also cleans the log folder.
 
-b. svs_2_heatmap.sh:
+b. **svs_2_heatmap.sh**  
 Runs the heatmap generation *including* patch extraction (tiling)
 
-c. patch_2_heatmap.sh:
+c. **patch_2_heatmap.sh**  
 Runs the heatmap generation *excluding* patch extraction (tiling)
 
-d. threshold_probability_heatmaps.sh:
+d. **threshold_probability_heatmaps.sh**  
 Creates binary predictions probability maps using the predefined thresholds saved in the model configuration file.
 
 
