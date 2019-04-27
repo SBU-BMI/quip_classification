@@ -19,6 +19,7 @@ else
 fi
 # Base directory
 BASE_DIR=/root/quip_classification/u24_lymphocyte/
+OUT_DIR=${BASE_DIR}/data/output
 
 # The username you want to download heatmaps from
 USERNAME=john.vanarnam@gmail.com
@@ -26,11 +27,12 @@ USERNAME=john.vanarnam@gmail.com
 CASE_LIST=${BASE_DIR}/data/raw_marking_to_download_case_list/case_list.txt
 
 # Paths of data, log, input, and output
-JSON_OUTPUT_FOLDER=${BASE_DIR}/data/heatmap_jsons
-BINARY_JSON_OUTPUT_FOLDER=${BASE_DIR}/data/heatmap_jsons_binary
-HEATMAP_TXT_OUTPUT_FOLDER=${BASE_DIR}/data/heatmap_txt
-BINARY_HEATMAP_TXT_OUTPUT_FOLDER=${BASE_DIR}/data/heatmap_txt_binary
-LOG_OUTPUT_FOLDER=${BASE_DIR}/data/log
+JSON_OUTPUT_FOLDER=${OUT_DIR}/heatmap_jsons
+BINARY_JSON_OUTPUT_FOLDER=${OUT_DIR}/heatmap_jsons_binary
+HEATMAP_TXT_OUTPUT_FOLDER=${OUT_DIR}/heatmap_txt
+BINARY_HEATMAP_TXT_OUTPUT_FOLDER=${OUT_DIR}/heatmap_txt_binary
+LOG_OUTPUT_FOLDER=${OUT_DIR}/log
+
 SVS_INPUT_PATH=${BASE_DIR}/data/svs
 PATCH_PATH=${BASE_DIR}/data/patches
 PATCH_SAMPLING_LIST_PATH=${BASE_DIR}/data/patch_sample_list
@@ -61,4 +63,29 @@ NEC_CNN_TRAINING_DATA=${BASE_DIR}/data/training_data_cnn
 NEC_CNN_TRAINING_DEVICE=gpu0
 NEC_CNN_PRED_DEVICE=gpu0
 EXTERNAL_LYM_MODEL=1
+
+# create missing output directories
+if [ ! -d ${OUT_DIR} ]; then
+  mkdir ${OUT_DIR} ;
+fi
+
+if [ ! -d ${JSON_OUTPUT_FOLDER} ]; then
+  mkdir ${JSON_OUTPUT_FOLDER} ;
+fi
+
+if [ ! -d ${BINARY_JSON_OUTPUT_FOLDER} ]; then
+  mkdir ${BINARY_JSON_OUTPUT_FOLDER} ;
+fi
+
+if [ ! -d ${HEATMAP_TXT_OUTPUT_FOLDER} ]; then
+  mkdir ${HEATMAP_TXT_OUTPUT_FOLDER} ;
+fi
+
+if [ ! -d ${BINARY_HEATMAP_TXT_OUTPUT_FOLDER} ]; then
+  mkdir ${BINARY_HEATMAP_TXT_OUTPUT_FOLDER} ;
+fi
+
+if [ ! -d ${LOG_OUTPUT_FOLDER} ]; then
+  mkdir ${LOG_OUTPUT_FOLDER} ;
+fi
 
