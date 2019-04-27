@@ -1,6 +1,6 @@
 ## Docker description
 
-Explain how to build and run docker image to generate whole slide image prediction heatmaps.
+This document explains how to build and run a docker image to generate whole slide image prediction heatmaps.
 
 ### Building the docker:
 
