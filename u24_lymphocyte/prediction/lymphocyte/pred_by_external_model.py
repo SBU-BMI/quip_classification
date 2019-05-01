@@ -16,7 +16,7 @@ CNNModel = sys.argv[2];
 
 heat_map_out = sys.argv[3];
 
-BatchSize = sys.argv[4]; # shahira: Batch size argument
+BatchSize = int(sys.argv[4]); # shahira: Batch size argument
 #BatchSize = 96;
 #BatchSize = 48;
 print('BatchSize = ', BatchSize);
