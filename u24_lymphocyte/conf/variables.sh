@@ -12,10 +12,8 @@ if [[ -n $HEATMAP_VERSION_NAME ]]; then
 else
 	HEATMAP_VERSION=lym_vgg-mix ;
 fi
-if [[ -n $BINARY_HEATMAP_VERSION_NAME ]]; then
-	BINARY_HEATMAP_VERSION=$BINARY_HEATMAP_VERSION_NAME ;
-else
-	BINARY_HEATMAP_VERSION=lym_vgg-mix_binary ;
+if [[ ! -n $LYM_PREDICTION_BATCH_SIZE ]]; then
+   LYM_PREDICTION_BATCH_SIZE=96;
 fi
 # Base directory
 BASE_DIR=/root/quip_classification/u24_lymphocyte/
@@ -55,6 +53,11 @@ LYM_CNN_PRED_DEVICE=gpu0
 #LYM_NECRO_CNN_MODEL_PATH=${BASE_DIR}/data/models_cnn
 #LYM_NECRO_CNN_MODEL_PATH=${BASE_DIR}/prediction/NNFramework_TF_models/config_vgg-mix_test_ext.ini
 if [[ -n $MODEL_CONFIG_FILENAME ]]; then
+  LYM_NECRO_CNN_MODEL_PATH=${BASE_DIR}/prediction/NNFramework_TF_models/${MODEL_CONFIG_FILENAME} ;
+else
+  LYM_NECRO_CNN_MODEL_PATH=${BASE_DIR}/prediction/NNFramework_TF_models/config_vgg-mix_test_ext.ini ;
+fi
+if [[ -n $LYM_PREDICTION_BATCH_SIZE ]]; then
   LYM_NECRO_CNN_MODEL_PATH=${BASE_DIR}/prediction/NNFramework_TF_models/${MODEL_CONFIG_FILENAME} ;
 else
   LYM_NECRO_CNN_MODEL_PATH=${BASE_DIR}/prediction/NNFramework_TF_models/config_vgg-mix_test_ext.ini ;

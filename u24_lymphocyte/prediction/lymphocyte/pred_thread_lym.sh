@@ -33,7 +33,7 @@ while [ 1 ]; do
             if [ ! -f ${files}/${DATA_FILE} ]; then
                 echo ${files}/${DATA_FILE} generating
                 THEANO_FLAGS="device=${DEVICE}" python -u ${EXEC_FILE} \
-                    ${files} ${LYM_NECRO_CNN_MODEL_PATH} ${DATA_FILE}
+                    ${files} ${LYM_NECRO_CNN_MODEL_PATH} ${DATA_FILE} ${LYM_PREDICTION_BATCH_SIZE}
             fi
         fi
     done

@@ -6,8 +6,6 @@ from PIL import Image
 from external_model import load_external_model, pred_by_external_model
 
 APS = 100;
-BatchSize = 96;
-#BatchSize = 48;
 
 TileFolder = sys.argv[1] + '/';
 CNNModel = sys.argv[2];
@@ -18,6 +16,10 @@ CNNModel = sys.argv[2];
 
 heat_map_out = sys.argv[3];
 
+BatchSize = sys.argv[4]; # shahira: Batch size argument
+#BatchSize = 96;
+#BatchSize = 48;
+print('BatchSize = ', BatchSize);
 
 def whiteness(png):
     wh = (np.std(png[:,:,0].flatten()) + np.std(png[:,:,1].flatten()) + np.std(png[:,:,2].flatten())) / 3.0;
