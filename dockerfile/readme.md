@@ -33,7 +33,10 @@ docker build -t til_pipeline .
 **BINARY_HEATMAP_VERSION_NAME:** The version name given to the set of binary (thresholded) predictions.  
 
 
-#### 3. Command to Execute:
+#### 3. Optional Environment Variable Settings:
+**LYM_PREDICTION_BATCH_SIZE:** The batch size used in prediction. Default is 96. Can reduce it to overcome out of memory issues if any.  
+
+#### 4. Command to Execute:
 There are several scripts that are useful for generating predictions heatmaps from whole slide images. Replace the placeholder *{Command}* with any of the script filenames :
 
 a. **cleanup_heatmap.sh**  
@@ -52,7 +55,7 @@ Creates binary predictions probability maps using the predefined thresholds save
 
   
 
-#### 4. Execute:
+#### 5. Execute:
 Run the below command replacing the {placeholders} with appropriate settings:  
 
 nvidia-docker run --name test_til_pipeline  -it \\  
@@ -63,6 +66,7 @@ nvidia-docker run --name test_til_pipeline  -it \\
 -e CUDA_VISIBLE_DEVICES='*{GPU ID}*'  \\  
 -e HEATMAP_VERSION_NAME='*{heatmap version name}*'  \\  
 -e BINARY_HEATMAP_VERSION_NAME='*{heatmap version name}*'  \\  
+-e LYM_PREDICTION_BATCH_SIZE='*{batch size}*'  \\  
 -d til_pipeline:latest  *{Command}*
  
 
@@ -76,6 +80,7 @@ nvidia-docker run --name til_pipeline --rm -it \\
 -e CUDA_VISIBLE_DEVICES='0'  \\  
 -e HEATMAP_VERSION_NAME='lym_vgg-mix_probability'  \\  
 -e BINARY_HEATMAP_VERSION_NAME='lym_vgg-mix_binary'  \\  
+-e LYM_PREDICTION_BATCH_SIZE=96  \\  
 -d til_pipeline:latest \\  
 svs_2_heatmap.sh
 
