@@ -49,6 +49,12 @@ for x in range(1, width, pw):
             pw_y = height - y;
         else:
             pw_y = pw;
+
+        if (int(patch_size_20X * pw_x / pw) <= 0) or \
+           (int(patch_size_20X * pw_y / pw) <= 0) or \
+           (pw_x <= 0) or (pw_y <= 0):
+            continue;
+
         patch = oslide.read_region((x, y), 0, (pw_x, pw_y));
         patch = patch.resize((int(patch_size_20X * pw_x / pw), int(patch_size_20X * pw_y / pw)), Image.ANTIALIAS);
         fname = '{}/{}_{}_{}_{}.png'.format(output_folder, x, y, pw, patch_size_20X);
