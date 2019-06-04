@@ -1,0 +1,64 @@
+
+To run code on dgx-1:
+
+1. Copy source code
+	git clone https://github.com/SBU-BMI/quip_classification
+
+2. Copy singularity container
+	cp /gpfs/projects/KurcGroup/sabousamra/lymphocite_pipeline.simg
+
+3. Download models:
+	(inside dgx-1)
+	cd <base_dir>/quip_classification/u24_lymphocyte/prediction/NNFramework_TF_models 
+	wget -v -O models.zip -L https://stonybrookmedicine.box.com/shared/static/bl15zu4lwb9cc7ltul15aa8kyrn7kh2d.zip 
+		
+4. Unzip models
+	(exit dgx-1)
+     unzip -o models.zip && rm -f models.zip
+
+5. Edit <base_dir>/quip_classification/u24_lymphocyte/conf/variables.sh
+	
+	a. change BASE_DIR to where quip_classification is located
+	b. set heatmap
+	c. before line 10 set HEATMAP_VERSION_NAME to something meaningful, example:
+		HEATMAP_VERSION_NAME=lym_vgg-mix;
+	d. before line 55 set  MODEL_CONFIG_FILENAME
+	if vgg model:
+	  MODEL_CONFIG_FILENAME=config_vgg-mix_test_ext.ini;
+	if using inception model
+	  MODEL_CONFIG_FILENAME=config_incep-mix_test_ext.ini;
+
+6. Copy whole slide files:
+
+	cd  <base_dir>/quip_classification/u24_lymphocyte/data
+	mkdir patches
+	mkdir svs
+	and copy wholes slide files to svs folder
+	
+
+7. Run singularity container:  
+	singularity run --bind <base_dir> --nv lymphocite_pipeline.simg
+	
+8. Execute and Create probability heatmap
+	cd <base_dir>/quip_classification/u24_lymphocyte/scripts
+	nohup bash svs_2_heatmap.sh &
+
+output will be in /gpfs/projects/KurcGroup/sabousamra/quip_classification/u24_lymphocyte/data/output
+
+9. Available commands:
+
+	a. cleanup_heatmap.sh
+Predictions are re-used if available. You can skip this step if you are only continuing the prediction without changing the model configuration.
+To create new predictions on the same svs files (probably using a different model) it is important to clean the previously generated predictions before performing running again using another model. This script also cleans the log folder.
+
+	b. svs_2_heatmap.sh
+Runs the heatmap generation including patch extraction (tiling)
+
+	c. patch_2_heatmap.sh
+Runs the heatmap generation excluding patch extraction (tiling)
+
+	d. threshold_probability_heatmaps.sh
+Creates binary predictions probability maps using the predefined thresholds saved in the model configuration file.
+
+
+
