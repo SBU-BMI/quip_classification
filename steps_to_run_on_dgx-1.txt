@@ -16,7 +16,11 @@ To run code on dgx-1:
 	(exit dgx-1)
      unzip -o models.zip && rm -f models.zip
 
-5. Edit <base_dir>/quip_classification/u24_lymphocyte/conf/variables.sh
+5. Edit models location in model config files.
+	edit the ini files located in  <base_dir>/quip_classification/u24_lymphocyte/prediction/NNFramework_TF_models
+	replace /root with <base_dir>
+
+6. Edit <base_dir>/quip_classification/u24_lymphocyte/conf/variables.sh
 	
 	a. change BASE_DIR to where quip_classification is located
 	b. set heatmap
@@ -28,7 +32,7 @@ To run code on dgx-1:
 	if using inception model
 	  MODEL_CONFIG_FILENAME=config_incep-mix_test_ext.ini;
 
-6. Copy whole slide files:
+7. Copy whole slide files:
 
 	cd  <base_dir>/quip_classification/u24_lymphocyte/data
 	mkdir patches
@@ -36,16 +40,16 @@ To run code on dgx-1:
 	and copy wholes slide files to svs folder
 	
 
-7. Run singularity container:  
+8. Run singularity container:  
 	singularity run --bind <base_dir> --nv lymphocite_pipeline.simg
 	
-8. Execute and Create probability heatmap
+9. Execute and Create probability heatmap
 	cd <base_dir>/quip_classification/u24_lymphocyte/scripts
 	nohup bash svs_2_heatmap.sh &
 
 output will be in /gpfs/projects/KurcGroup/sabousamra/quip_classification/u24_lymphocyte/data/output
 
-9. Available commands:
+10. Available commands:
 
 	a. cleanup_heatmap.sh
 Predictions are re-used if available. You can skip this step if you are only continuing the prediction without changing the model configuration.
