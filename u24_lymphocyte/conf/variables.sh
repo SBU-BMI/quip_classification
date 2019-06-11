@@ -12,6 +12,11 @@ if [[ -n $HEATMAP_VERSION_NAME ]]; then
 else
 	HEATMAP_VERSION=lym_vgg-mix ;
 fi
+if [[ -n $BINARY_HEATMAP_VERSION_NAME ]]; then
+	BINARY_HEATMAP_VERSION=$BINARY_HEATMAP_VERSION_NAME ;
+else
+	BINARY_HEATMAP_VERSION=lym_vgg-mix_binary ;
+fi
 if [[ ! -n $LYM_PREDICTION_BATCH_SIZE ]]; then
    LYM_PREDICTION_BATCH_SIZE=96;
 fi
