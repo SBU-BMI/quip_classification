@@ -2,6 +2,10 @@
 
 This document explains how to build and run a docker image to generate whole slide image prediction heatmaps.
 
+## CUDA versions
+
+The base image for this container is nvcr.io/nvidia/tensorflow:18.11-py3. You will need CUDA version 10.x and driver version 410.xx on the host system (https://docs.nvidia.com/deeplearning/frameworks/tensorflow-release-notes/rel_18.11.html) to run the container. 
+
 ### Building the docker:
 
 1. Navigate to the directory containing the Dockerfile: 
