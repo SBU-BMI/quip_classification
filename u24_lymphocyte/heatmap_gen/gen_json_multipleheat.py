@@ -62,7 +62,9 @@ imgfilename = svs_img_folder + '/' + casename + '.svs';
 if not os.path.isfile(imgfilename):
     imgfilename = svs_img_folder + '/' + casename + '.tif';
 if not os.path.isfile(imgfilename):
-    print("{}.svs/tif does not exist".format(svs_img_folder + '/' + casename));
+    imgfilename = svs_img_folder + '/' + casename + '.scn';
+if not os.path.isfile(imgfilename):
+    print("{}.svs/tif/scn does not exist".format(svs_img_folder + '/' + casename));
     print("Quit");
     sys.exit(0);
 print("Doing {}".format(imgfilename));

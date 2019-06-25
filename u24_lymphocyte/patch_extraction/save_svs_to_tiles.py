@@ -56,6 +56,10 @@ for x in range(1, width, pw):
             continue;
 
         patch = oslide.read_region((x, y), 0, (pw_x, pw_y));
+        #shahira: skip where the alpha channel is zero
+        patch_arr = np.array(patch);
+        if(patch_arr[:,:,3].max() == 0):
+            continue;
         patch = patch.resize((int(patch_size_20X * pw_x / pw), int(patch_size_20X * pw_y / pw)), Image.ANTIALIAS);
         fname = '{}/{}_{}_{}_{}.png'.format(output_folder, x, y, pw, patch_size_20X);
         patch.save(fname);
