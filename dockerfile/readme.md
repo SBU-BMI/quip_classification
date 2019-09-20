@@ -56,7 +56,7 @@ Runs the heatmap generation *excluding* patch extraction (tiling)
 d. **threshold_probability_heatmaps.sh**  
 Creates binary predictions probability maps using the predefined thresholds saved in the model configuration file.
 
-e. **get_thresholded_heatmap_png.sh**  
+e. **get_binary_png_heatmaps.sh**  
 Generate binary heatmaps in png format.
 
   
