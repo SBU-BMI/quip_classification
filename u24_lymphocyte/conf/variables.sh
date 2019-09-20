@@ -46,7 +46,7 @@ TUMOR_GROUND_TRUTH=${BASE_DIR}/data/tumor_ground_truth_maps
 TUMOR_IMAGES_TO_EXTRACT=${BASE_DIR}/data/tumor_images_to_extract
 GRAYSCALE_HEATMAPS_PATH=${BASE_DIR}/data/grayscale_heatmaps
 #THRESHOLDED_HEATMAPS_PATH=${BASE_DIR}/data/thresholded_heatmaps
-THRESHOLDED_HEATMAPS_PATH=${OUT_DIR}/thresholded_heatmaps
+THRESHOLDED_HEATMAPS_PATH=${OUT_DIR}/rates-cancertype-all-auto
 PATCH_FROM_HEATMAP_PATH=${BASE_DIR}/data/patches_from_heatmap
 THRESHOLD_LIST=${BASE_DIR}/data/threshold_list/threshold_list.txt
 
