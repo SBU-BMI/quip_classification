@@ -5,6 +5,9 @@ from PIL import Image
 
 from external_model import load_external_model, pred_by_external_model
 
+from PIL import ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 APS = 100;
 
 TileFolder = sys.argv[1] + '/';
