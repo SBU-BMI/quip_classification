@@ -57,7 +57,7 @@ d. **threshold_probability_heatmaps.sh**
 Creates binary predictions probability maps using the predefined thresholds saved in the model configuration file.
 
 e. **get_binary_png_heatmaps.sh**  
-Generate binary heatmaps in png format.
+Generate binary heatmaps in png format. We are currently testing this functionality.
 
   
 
