@@ -54,10 +54,12 @@ c. **patch_2_heatmap.sh**
 Runs the heatmap generation *excluding* patch extraction (tiling)
 
 d. **threshold_probability_heatmaps.sh**  
-Creates binary predictions probability maps using the predefined thresholds saved in the model configuration file.
+Creates binary predictions probability maps using the predefined thresholds saved in the model configuration file.  
+This script does not run CNNs on GPUs.
 
 e. **get_binary_png_heatmaps.sh**  
-Generate binary heatmaps in png format. We are currently testing this functionality.
+Generate binary heatmaps in png format. We are currently testing this functionality.  
+This script does not run CNNs on GPUs.
 
   
 
@@ -80,8 +82,8 @@ nvidia-docker run --name test_til_pipeline  -it \\
 
 nvidia-docker run --name til_pipeline --rm -it \\  
 -v /nfs/bigbrain/shahira/svs:/root/quip_classification/u24_lymphocyte/data/svs  \\  
--v  /nfs/bigbrain/shahira/patches:/root/quip_classification/u24_lymphocyte/data/patches   \\  
--v  /nfs/bigbrain/shahira/til_output:/root/quip_classification/u24_lymphocyte/data/output   \\  
+-v /nfs/bigbrain/shahira/patches:/root/quip_classification/u24_lymphocyte/data/patches   \\  
+-v /nfs/bigbrain/shahira/til_output:/root/quip_classification/u24_lymphocyte/data/output   \\  
 -e MODEL_CONFIG_FILENAME='config_vgg-mix_test_ext.ini'  \\  
 -e CUDA_VISIBLE_DEVICES='0'  \\  
 -e HEATMAP_VERSION_NAME='lym_vgg-mix_probability'  \\  
@@ -91,4 +93,4 @@ nvidia-docker run --name til_pipeline --rm -it \\
 svs_2_heatmap.sh
 
 
-Note that for threshold_probability_heatmaps.sh and get_binary_png_heatmaps.sh, you can omit the "-e MODEL_CONFIG_FILENAME", "-e CUDA_VISIBLE_DEVICES", "-e LYM_PREDICTION_BATCH_SIZE" arguments, since these two scripts do not run CNN models on GPUs.
+Note that for *threshold_probability_heatmaps.sh* and *get_binary_png_heatmaps.sh*, you can omit "-e MODEL_CONFIG_FILENAME", "-e CUDA_VISIBLE_DEVICES", "-e LYM_PREDICTION_BATCH_SIZE" arguments, since these two scripts do not run CNN models on GPUs.
