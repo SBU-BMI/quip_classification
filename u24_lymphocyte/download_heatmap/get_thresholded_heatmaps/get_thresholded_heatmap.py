@@ -3,7 +3,7 @@ from get_labeled_im import *
 from get_whiteness_im import *
 from get_tissue_map import *
 import sys
-from scipy import misc
+from PIL import Image
 
 svs_name = sys.argv[1]
 width = int(sys.argv[2])
@@ -21,4 +21,5 @@ im[:, :, 1] = 255 * necr
 im[:, :, 2] = 255 * get_tissue_map(whiteness) * (im[:, :, 0] == 0).astype(np.uint8)
 
 im = np.swapaxes(im, 0, 1)
-misc.imsave('{}/{}.png'.format(output_path, svs_name), im)
+
+Image.fromarray(im).save('{}/{}.png'.format(output_path, svs_name))
