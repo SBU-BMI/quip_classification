@@ -58,7 +58,7 @@ Creates binary predictions probability maps using the predefined thresholds save
 This script does not run CNNs on GPUs.
 
 e. **get_binary_png_heatmaps.sh**  
-Generate binary heatmaps in png format. We are currently testing this functionality.  
+Generate binary heatmaps in png format.  
 This script does not run CNNs on GPUs.
 
   
