@@ -93,4 +93,4 @@ nvidia-docker run --name til_pipeline --rm -it \\
 svs_2_heatmap.sh
 
 
-Note that for *threshold_probability_heatmaps.sh* and *get_binary_png_heatmaps.sh*, you can omit "-e MODEL_CONFIG_FILENAME", "-e CUDA_VISIBLE_DEVICES", "-e LYM_PREDICTION_BATCH_SIZE" arguments, since these two scripts do not run CNN models on GPUs.
+Note that for *threshold_probability_heatmaps.sh* and *get_binary_png_heatmaps.sh*, you can omit "-e CUDA_VISIBLE_DEVICES", "-e LYM_PREDICTION_BATCH_SIZE" arguments, since these two scripts do not run CNN models on GPUs. Additionally, for *get_binary_png_heatmaps.sh*, you can also omit "-e MODEL_CONFIG_FILENAME".
