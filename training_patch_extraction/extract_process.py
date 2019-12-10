@@ -25,6 +25,7 @@ def extract_rand_patch(svs_path, pat_xys):
     pw_20X = 100
     oslide = openslide.OpenSlide(svs_path)
     if openslide.PROPERTY_NAME_MPP_X in oslide.properties:
+        # mpp=0.25 --> 40X, mpp=0.50 --> 20X
         mag = 10.0 / float(oslide.properties[openslide.PROPERTY_NAME_MPP_X])
     elif "XResolution" in oslide.properties:
         mag = 10.0 / float(oslide.properties["XResolution"])
