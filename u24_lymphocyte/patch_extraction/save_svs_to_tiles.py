@@ -60,6 +60,8 @@ for x in range(1, width, pw):
         patch_arr = np.array(patch);
         if(patch_arr[:,:,3].max() == 0):
             continue;
+            
+        # Resize into 20X.
         patch = patch.resize((int(patch_size_20X * pw_x / pw), int(patch_size_20X * pw_y / pw)), Image.ANTIALIAS);
         fname = '{}/{}_{}_{}_{}.png'.format(output_folder, x, y, pw, patch_size_20X);
         patch.save(fname);
