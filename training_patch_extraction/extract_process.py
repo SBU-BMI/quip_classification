@@ -33,14 +33,14 @@ def extract_rand_patch(svs_path, pat_xys):
         mag = 10.0 / float(0.254)
 
     pw = float(int(10 * pw_20X * mag / 20)) / 10.0
-    pw3 = int(pw * 3)
+    pw3 = int(pw * 3)  # extracts a 3x3 super-patch.
     pw3_20X = int(pw_20X * 3)
     width = oslide.dimensions[0]
     height = oslide.dimensions[1]
 
     for pat_x, pat_y in pat_xys:
-        x = int(1 + pw * pat_x - pw)
-        y = int(1 + pw * pat_y - pw)
+        x = int(1 + pw * pat_x - pw)  # extracts a 3x3 super-patch. So jump one pw backwards.
+        y = int(1 + pw * pat_y - pw)  # extracts a 3x3 super-patch. So jump one pw backwards.
         if x <= 0 or y <= 0 or x + pw3 >= width or y + pw3 >= height:
             print('Patch extracting out of range {}/{} {}/{} {}/{}'.format(
                 x, y, pat_x, pat_y, width, height))
