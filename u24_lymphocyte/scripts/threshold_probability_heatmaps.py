@@ -62,6 +62,7 @@ def edit_json(json_folder_path, out_dir, threshold, suffix = None, new_heatmap_v
             line_new = json.dumps(line_json);
             #print(line_new);
             dest_file.write(line_new);
+            dest_file.write('\n')
         file.close();
         dest_file.close();
 
@@ -103,6 +104,7 @@ def edit_json(json_folder_path, out_dir, threshold, suffix = None, new_heatmap_v
 
             line_new = json.dumps(line_json);
             dest_file.write(line_new);
+            dest_file.write('\n')
         file.close();
         dest_file.close();
 
