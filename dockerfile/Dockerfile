@@ -16,6 +16,8 @@ RUN	git clone https://github.com/SBU-BMI/quip_classification && \
         unzip -o models.zip && rm -f models.zip && \
 	chmod 0755 /root/quip_classification/u24_lymphocyte/scripts/*
 
+RUN apt install -y parallel
+
 ENV	BASE_DIR="/root/quip_classification/u24_lymphocyte"
 ENV	PATH="./":$PATH
 WORKDIR /root/quip_classification/u24_lymphocyte/scripts
