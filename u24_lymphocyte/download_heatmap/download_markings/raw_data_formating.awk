@@ -20,7 +20,7 @@ BEGIN {
             sub(",", "", mark_width);
         }
         else if ($i == "date") {
-            date = $(i+1);
+            date = $(i+4);
             sub(",", "", date);
         }
         else if (match($i, "coordinates"))
@@ -28,4 +28,3 @@ BEGIN {
     }
     print case_id"\t"username"\t"mark_type"\t"mark_width"\t"date"\t"coordinates;
 }
-
