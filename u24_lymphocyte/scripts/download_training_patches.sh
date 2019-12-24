@@ -1,24 +1,39 @@
 #!/bin/bash
 
 cd ../
-source ./conf/variables.sh
 
-cd ./download_heatmap/download_markings
-bash start.sh &> ${LOG_OUTPUT_FOLDER}/log.download_markings.txt
+# 1. Query database and download markups in json format.
+#
+# Input:
+#   download_heatmap/download_markings/list.txt
+#     The list of WSIs Raj labeled
+#   download_heatmap/download_markings/get_raw_json_mongoexport.sh
+#     Change the annotator's accout name if he/she is not Raj.
+# Output:
+#   download_heatmap/download_markings/raw_json/
+cd download_heatmap/download_markings/
+if [ ! -f lists.txt ]; then
+    echo "Error: no download_heatmap/download_markings/lists.txt"
+    exit 1
+fi
+bash get_raw_json_mongoexport.sh
 cd ../../
 
-cd ./download_heatmap/get_modified_heatmaps
-bash start.sh &> ${LOG_OUTPUT_FOLDER}/log.get_modified_heatmaps.txt
+# 2. Convert json to easy txt format
+cd download_heatmap/download_markings/
+bash draw_raw_xy.sh
 cd ../../
 
-rm -rf ${PATCH_FROM_HEATMAP_PATH}/*     # delete all existing files in the data/patches_from_heatmaps
-cd ./patch_extraction_from_list
-for file in ${MODIFIED_HEATMAPS_PATH}/*.csv; do
-    if [ ! -f ${file} ]; then
-        continue;
-    fi
-    bash start.sh ${file} 1 &> ${LOG_OUTPUT_FOLDER}/log.patch_extraction_from_list.txt
-done
-cd ../
+# 3. Get modified heatmap png files
+cd download_heatmap/get_modified_heatmaps/
+bash start.sh
+cd ../../
 
+# 4. Extract all labeled patches
+cd additional_code/get_ground_truth/
+bash get_patch_coordinates.sh
+bash draw_patches.sh
+cd ../../
+
+# Results are under additional_code/get_ground_truth/patches:
 exit 0
