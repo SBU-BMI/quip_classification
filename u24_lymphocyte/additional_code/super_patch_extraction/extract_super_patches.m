@@ -3,9 +3,9 @@ function extract_super_patches()
 n_picked_each_bin = 5;
 src_dir = 'super_patch_coords';
 des_dir = 'super_patches';
-cancertype_arr = {'blca' 'brca' 'cesc' 'coad' 'luad' 'lusc' 'paad' 'prad' 'read' 'skcm' 'stad' 'ucec' 'uvm'};
 
-% slide_folder_arr should be in the same order as cancertype_arr!
+% Keep the following arrays in the same order of cancer types.
+cancertype_arr = {'blca' 'brca' 'cesc' 'coad' 'luad' 'lusc' 'paad' 'prad' 'read' 'skcm' 'stad' 'ucec' 'uvm'};
 slide_folder_arr = {...
     '/data02/tcga_data/tumor/blca', ...
     '/data03/tcga_data/tumor/brca', ...
@@ -64,12 +64,16 @@ for i_cancer_type = 1:length(cancertype_arr)
                 continue;
             end
             slidefilename = sl_list{1};
-            slidepath = sprintf('%s/%s.svs', slide_folder, slidefilename);
+            slidepath = sprintf('%s/%s', slide_folder, slidefilename);
 
             % Get mpp
             str = sprintf('/cm/shared/apps/extlibs/bin/openslide-show-properties %s | grep openslide.mpp-x', slidepath);
             [status, mpp_line] = system(str);
             fields = strsplit(mpp_line, '''');
+            if (length(fields) ~= 3)
+                printf('%s property error\n', slidepath);
+                continue;
+            end
             mpp = str2num(fields{2});
 
             % Get patch_size
