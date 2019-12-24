@@ -1,4 +1,6 @@
-function [pred, pred_binary, necr, modification_mark, tumor_im, patch_size, notum_im, calc_width, calc_height, tot_width, tot_height] = get_labeled_im(weight_file, mark_file, pred_file, tot_width, tot_height)
+function [pred, pred_binary, necr, modification_mark, tumor_im, patch_size, notum_im, tot_width, tot_height] = get_labeled_im(weight_file, mark_file, tot_width, tot_height, mpp)
+
+fprintf('ledebug mark_file: %s\n', mark_file);
 
 % This settings may need tuning
 clusterPointsDisPos = 0.003;
@@ -14,22 +16,18 @@ smh_w = 0.01 + 2 * w(3) * w(3);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 [~, ~, m_type, m_width, tses, poly] = textread(mark_file, '%s%s%s%d%s%s', 'delimiter', '\t', 'bufsize', 65536);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-pred_data = load(pred_file);
-x = int32(pred_data(:, 1));
-y = int32(pred_data(:, 2));
-l = pred_data(:, 3);
-if size(pred_data, 2) > 3
-    n = pred_data(:, 4);
-else
-    n = zeros(length(x), 1);
-end
-calc_width = max(x(:)) + min(x(:));
-calc_height = max(y(:)) + min(y(:));
-patch_size = (double(min(x(:))) + double(max(x(:)))) / length(unique(x(:)));
+%%%%%%%%%%%%%%%%%%%%
+pw_20X = 100;
+mag = 10.0 / mpp;
+patch_size = double(int32(floor(10 * pw_20X * mag / 20))) / 10.0;
 
-x = round((x+patch_size/2) / patch_size);
-y = round((y+patch_size/2) / patch_size);
+x = repmat([1:floor(tot_width / patch_size)], floor(tot_height / patch_size), 1);
+x = x(:);
+y = repmat([1:floor(tot_height / patch_size)], 1, floor(tot_width / patch_size));
+y = y(:);
+l = zeros(length(x), 1);
+n = zeros(length(x), 1);
+%%%%%%%%%%%%%%%%%%%%
 
 iml = zeros(max(x(:)), max(y(:)));
 for iter = 1:length(x)
@@ -84,7 +82,7 @@ for iter = 1:length(m_type)
             norm_x = po(jter);
             norm_y = po(jter+1);
             modification_mark = marking(modification_mark, ...
-                255, mw, norm_x, norm_y, calc_width, calc_height, tot_width, tot_height);
+                255, mw, norm_x, norm_y, tot_width, tot_height, patch_size);
         end
     elseif (strcmp(mt, 'LymNeg'))
         lab = 0;
@@ -92,7 +90,7 @@ for iter = 1:length(m_type)
             norm_x = po(jter);
             norm_y = po(jter+1);
             modification_mark = marking(modification_mark, ...
-                  0, mw, norm_x, norm_y, calc_width, calc_height, tot_width, tot_height);
+                  0, mw, norm_x, norm_y, tot_width, tot_height, patch_size);
         end
     elseif (strcmp(mt, 'TumorPos'))
         if isempty(cur_c) || ...
@@ -222,12 +220,12 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function im = marking(im, lab, width, norm_x, norm_y, calc_width, calc_height, tot_width, tot_height)
-norm_step_x = 1.0 / size(im, 1) / 2.0;
-norm_step_y = 1.0 / size(im, 2) / 2.0;
+function im = marking(im, lab, width, norm_x, norm_y, tot_width, tot_height, patch_size)
 if width == 1
-    im = marking_one_step(im, lab, norm_x, norm_y, calc_width, calc_height, tot_width, tot_height);
+    im = marking_one_step(im, lab, norm_x, norm_y, tot_width, tot_height, patch_size);
 else
+    norm_step_x = 1.0 / size(im, 1) / 2.0;
+    norm_step_y = 1.0 / size(im, 2) / 2.0;
     for bi = -3:3
         for bj = -3:3
             norm_x_add = norm_x + bi * norm_step_x;
@@ -236,18 +234,17 @@ else
                 continue;
             end
             
-            im = marking_one_step(im, lab, norm_x_add, norm_y_add, calc_width, calc_height, tot_width, tot_height);
+            im = marking_one_step(im, lab, norm_x_add, norm_y_add, tot_width, tot_height, patch_size);
         end
     end
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function im = marking_one_step(im, lab, norm_x, norm_y, calc_width, calc_height, tot_width, tot_height)
-x = ceil(size(im,1)*(norm_x*tot_width)/calc_width);
-y = ceil(size(im,2)*(norm_y*tot_height)/calc_height);
+function im = marking_one_step(im, lab, norm_x, norm_y, tot_width, tot_height, patch_size)
+x = ceil(norm_x * tot_width / patch_size);
+y = ceil(norm_y * tot_height / patch_size);
 if x > 0 & y > 0
     im(x, y) = lab;
 else
     sprintf('Warning: index out of bound in get_labeled_im.m/marking_one_step()')
 end
-
