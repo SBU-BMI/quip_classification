@@ -67,8 +67,7 @@ for i_cancer_type = 1:length(cancertype_arr)
             slidepath = sprintf('%s/%s.svs', slide_folder, slidefilename);
 
             % Get mpp
-            str = sprintf('/cm/shared/apps/extlibs/bin/openslide-show-properties %s | grep openslide.mpp-x',
-                          slidepath);
+            str = sprintf('/cm/shared/apps/extlibs/bin/openslide-show-properties %s | grep openslide.mpp-x', slidepath);
             [status, mpp_line] = system(str);
             fields = strsplit(mpp_line, '''');
             mpp = str2num(fields{2});
