@@ -2,6 +2,8 @@
 
 source ../../conf/variables.sh
 
+mkdir -p ${MODIFIED_HEATMAPS_PATH}
+
 # This script takes input from ${RAW_MARKINGS_PATH}/
 # Check out ../download_markings/start.sh on how to prepare the input files
 
@@ -24,25 +26,19 @@ MARKING_FOLDER=${RAW_MARKINGS_PATH}
 # of the slides
 SLIDES=${SVS_INPUT_PATH}
 
-# Locations of unmodified heatmaps
-# The filenames of the unmodifed heatmaps should be:
-#   prediction-${slide_id}
-# For example:
-#   prediction-TCGA-NJ-A55O-01Z-00-DX1
-HEAT_LOC=${HEATMAP_TXT_OUTPUT_FOLDER}
-
 for files in ${MARKING_FOLDER}/*_weight.txt; do
+    if [ ! -f ${files} ]; then
+        continue;
+    fi
+
     # Get slide id
     SVS=`echo ${files} | awk -F'/' '{print $NF}' | awk -F'__x__' '{print $1}'`
     # Get user name
-    USER=`echo ${files} | awk -F'/' '{print $NF}' | awk -F'__x__' '{print $2}'`
+    USER=`echo ${files} | awk -F'/' '{print $NF}' | awk -F'__x__' '{print $2}' | awk -F'_' '{print $1}'`
 
     # Get corresponding weight and marking files
     WEIGHT=${files}
     MARK=`echo ${files} | awk '{gsub("weight", "mark"); print $0;}'`
-
-    # Find the unmodified heatmap
-    PRED=`ls -1 ${HEAT_LOC}/prediction-${SVS}*|grep -v low_res`
 
     if [ ! `ls -1 ${SLIDES}/${SVS}*.svs` ]; then
         echo "${SLIDES}/${SVS}.XXXX.svs does not exist. Trying tif..."
@@ -60,9 +56,11 @@ for files in ${MARKING_FOLDER}/*_weight.txt; do
           | grep "openslide.level\[0\].width"  | awk '{print substr($2,2,length($2)-2);}'`
     HEIGHT=`openslide-show-properties ${SVS_FILE} \
           | grep "openslide.level\[0\].height" | awk '{print substr($2,2,length($2)-2);}'`
+    MPP=`openslide-show-properties ${SVS_FILE} \
+          | grep "aperio.MPP" | awk '{print substr($2,2,length($2)-2)}'`
 
     matlab -nodisplay -singleCompThread -r \
-    "get_modified_heatmap('${SVS}', ${WIDTH}, ${HEIGHT}, '${USER}', '${WEIGHT}', '${MARK}', '${PRED}'); exit;" \
+    "get_modified_heatmap('${SVS}', ${WIDTH}, ${HEIGHT}, '${USER}', '${WEIGHT}', '${MARK}', ${MPP}); exit;" \
     </dev/null
 done
 
