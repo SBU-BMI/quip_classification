@@ -1,8 +1,8 @@
-function extract_super_patch()
+function extract_super_patches()
 
 n_picked_each_bin = 5;
-src_dir = '/nfs/data07/shared/lehhou/lym_outputs/validation_8x8_shahira_sample';
-des_dir = '/nfs/data07/shared/lehhou/lym_outputs/validation_8x8_shahira_image';
+src_dir = 'super_patch_coords';
+des_dir = 'super_patches';
 cancertype_arr = {'blca' 'brca' 'cesc' 'coad' 'luad' 'lusc' 'paad' 'prad' 'read' 'skcm' 'stad' 'ucec' 'uvm'};
 
 slide_folder_arr = {...
