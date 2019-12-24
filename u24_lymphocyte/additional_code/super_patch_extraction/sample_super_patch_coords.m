@@ -1,4 +1,4 @@
-function distribution_8x8_sample()
+function sample_super_patch_coords()
 
 parent_out_dir = 'super_patch_coords';
 src_hard_dir = '/nfs/data02/shared/lehhou/lym_data_for_publication/TIL_maps_after_thres_v1';
