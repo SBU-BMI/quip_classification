@@ -35,5 +35,5 @@ bash get_patch_coordinates.sh
 bash draw_patches.sh
 cd ../../
 
-# Results are under additional_code/get_ground_truth/patches:
+# Results are under additional_code/get_ground_truth/patches/
 exit 0
