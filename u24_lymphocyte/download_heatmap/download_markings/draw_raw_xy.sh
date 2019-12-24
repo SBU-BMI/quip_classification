@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source ../../conf/variables.sh
+mkdir -p ${RAW_MARKINGS_PATH}
 
 for fn in raw_json/*.json; do
     len=`cat ${fn} | wc -l`
