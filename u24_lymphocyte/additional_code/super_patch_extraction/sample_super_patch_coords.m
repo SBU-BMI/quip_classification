@@ -1,6 +1,6 @@
 function distribution_8x8_sample()
 
-parent_out_dir = '/data07/shared/lehhou/lym_outputs/validation_8x8_shahira_sample';
+parent_out_dir = 'super_patch_coords';
 src_hard_dir = '/nfs/data02/shared/lehhou/lym_data_for_publication/TIL_maps_after_thres_v1';
 src_soft_dir = '/nfs/data02/shared/lehhou/lym_data_for_publication/TIL_maps_before_thres_v1';
 group_width = 8;
@@ -16,8 +16,6 @@ cancer_type = cancertype_arr{cancer_idx};
 disp(cancer_type);
 
 
-
-%parent_out_dir = '/data07/shared/lehhou/lym_outputs/csv';
 out_dir = fullfile(parent_out_dir, cancer_type);
 if (exist(out_dir) == 0)
     mkdir(out_dir);
