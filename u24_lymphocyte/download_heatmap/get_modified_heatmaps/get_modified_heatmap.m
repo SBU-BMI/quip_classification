@@ -1,8 +1,8 @@
-function get_modified_heatmap(svs_name, width, height, username, weight_file, mark_file, pred_file)
+function get_modified_heatmap(svs_name, width, height, username, weight_file, mark_file, mpp)
 % generate human made binary map
 
-[pred, pred_binary, necr, modification, tumor, patch_size, ~, ~, ~, ~, ~] = ...
-    get_labeled_im(weight_file, mark_file, pred_file, width, height);
+[pred, pred_binary, necr, modification, tumor, patch_size, ~, ~, ~] = ...
+    get_labeled_im(weight_file, mark_file, width, height, mpp);
 
 total = size(modification,1)*size(modification,2);
 lym = sum(modification(:)>0.5);
@@ -25,4 +25,3 @@ fclose(fid);
 
 im = permute(im, [2, 1, 3]);
 imwrite(im, ['modified_heatmaps/', svs_name, '.', username, '.png']);
-
