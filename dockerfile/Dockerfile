@@ -1,10 +1,10 @@
-FROM	nvcr.io/nvidia/tensorflow:18.11-py3
+FROM	tensorflow/tensorflow:1.12.3-gpu-py3
 MAINTAINER quip_classification 
 
 ENTRYPOINT []
 
 RUN 	apt-get -y update && \
-	apt-get -y install python3-pip openslide-tools wget && \
+	apt-get -y install git python3-pip openslide-tools wget && \
 	pip install openslide-python scikit-image pymongo 
 
 WORKDIR /root
