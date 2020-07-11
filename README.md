@@ -12,6 +12,3 @@ The folders are organized as follows:
 
 **u24_lymphocyte:** is the code for whole slide image (WSI) prediction. It can perform both slide tiling and prediction and is used by the docker. It is self contained and does not require any other codes. 
 
-
-
-
