@@ -70,6 +70,7 @@ for external input (i.e. not using a data provider) use *tf_classifier_runner_ex
 ### Running command:
 To run use a command with the following format:  
 cd  <root>/quip_classification/NNFramework_TF_external_call
+
 python external_train.py < config file full path > 
 
 *Example:*  
