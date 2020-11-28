@@ -69,11 +69,12 @@ for external input (i.e. not using a data provider) use *tf_classifier_runner_ex
 
 ### Running command:
 To run use a command with the following format:  
-python < runner py file > < config file full path >  
+cd  <root>/quip_classification/NNFramework_TF_external_call
+python external_train.py < config file full path > 
 
 *Example:*  
-python sa_runners/tf_classifier_runner.py $HOME/NNFramework/config/config_tcga_resnet-101.ini  
-
+cd  $HOME/quip_classification/NNFramework_TF_external_call
+python external_train.py $HOME/NNFramework/config/config_tcga_resnet-101.ini  
 
 
 ### Running batch jobs with Singularity  
@@ -88,6 +89,7 @@ singularity build --sandbox tf-18.11-py3-w docker://nvcr.io/nvidia/tensorflow:18
 module unload singularity  
 module load singularity/2.6.1  
 singularity run --writable  --bind $SCRATCH --nv $SCRATCH/containers/tensorflow/tf-18.11-py3-w  
+
 cd /home/shahira/NNFramework_TF_external_call 
 python external_train.py $HOME/NNFramework/config_tcga_resnet-101.ini
 
