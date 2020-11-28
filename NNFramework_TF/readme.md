@@ -69,12 +69,11 @@ for external input (i.e. not using a data provider) use *tf_classifier_runner_ex
 
 ### Running command:
 To run use a command with the following format:  
-cd  <root>/quip_classification/NNFramework_TF_external_call
-
-python external_train.py < config file full path > 
+cd  <root>/quip_classification/NNFramework_TF_external_call  
+python external_train.py < config file full path >   
 
 *Example:*  
-cd  $HOME/quip_classification/NNFramework_TF_external_call
+cd  $HOME/quip_classification/NNFramework_TF_external_call  
 python external_train.py $HOME/NNFramework/config/config_tcga_resnet-101.ini  
 
 
@@ -92,7 +91,7 @@ module load singularity/2.6.1
 singularity run --writable  --bind $SCRATCH --nv $SCRATCH/containers/tensorflow/tf-18.11-py3-w  
 
 cd /home/shahira/NNFramework_TF_external_call 
-python external_train.py $HOME/NNFramework/config_tcga_resnet-101.ini
+python external_train.py $HOME/NNFramework/config_tcga_resnet-101.ini  
 
 external_model.py provides api for running from another application without using a data provider.
   
