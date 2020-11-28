@@ -90,7 +90,7 @@ module unload singularity
 module load singularity/2.6.1  
 singularity run --writable  --bind $SCRATCH --nv $SCRATCH/containers/tensorflow/tf-18.11-py3-w  
 
-cd /home/shahira/NNFramework_TF_external_call 
+cd /home/shahira/NNFramework_TF_external_call  
 python external_train.py $HOME/NNFramework/config_tcga_resnet-101.ini  
 
 external_model.py provides api for running from another application without using a data provider.
