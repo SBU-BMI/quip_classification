@@ -18,9 +18,6 @@ From: tensorflow/tensorflow:1.13.1-gpu-py3
 	export BASE_DIR="/root/quip_classification/u24_lymphocyte"
 	export PATH="/usr/local/bin:./":$PATH
 
-%apprun svs_2_heatmap.sh
-	${BASE_DIR}/scripts/svs_2_heatmap.sh
-
 %runscript
 	cd ${BASE_DIR}/scripts
 	/bin/bash "$@"
