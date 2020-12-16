@@ -47,7 +47,8 @@ def low_res(fpath):
     f.close();
 
 
-directory = './patch-level-merged/';
+base_directory = os.environ.get('INTERMEDIATE_FOLDER')
+directory = base_directory+'/patch-level-merged/';
 for fn in os.listdir(directory):
     fpath = directory + fn;
     if not os.path.isfile(fpath):
