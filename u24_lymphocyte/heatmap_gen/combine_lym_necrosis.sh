@@ -66,6 +66,6 @@ NR!=FNR{
         necrosis = 0;
     }
     print $1, $2, lym, necrosis;
-}' ./${NEC_FOLDER}/${FN} ./${LYM_FOLDER}/${1} > ${OUT_FOLDER}/${FN}
+}' ${NEC_FOLDER}/${FN} ${LYM_FOLDER}/${1} > ${OUT_FOLDER}/${FN}
 
 exit 0

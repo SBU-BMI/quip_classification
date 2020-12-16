@@ -23,6 +23,10 @@ heatmap_name = sys.argv[2];
 svs_img_folder=sys.argv[3];
 start_id_multiheat = 4;
 
+base_directory = os.environ.get('INTERMEDIATE_FOLDER')
+if base_directory is None:
+   base_directory = "/root/quip_classification/u24_lymphocyte/data/intermediate"
+
 # Load configs from ../conf/variables.sh
 mongo_host = 'localhost';
 mongo_port = 27017;
@@ -83,8 +87,8 @@ caseid = casename.split('.')[0]
 subjectid = '-'.join(caseid.split('-')[0:3])
 
 
-heatmapfile = './json/heatmap_' + filename.split('prediction-')[1] + '.json';
-metafile = './json/meta_' + filename.split('prediction-')[1] + '.json';
+heatmapfile = str(base_directory)+'/json/heatmap_' + filename.split('prediction-')[1] + '.json';
+metafile = str(base_directory)+'/json/meta_' + filename.split('prediction-')[1] + '.json';
 
 oslide = openslide.OpenSlide(imgfilename);
 slide_width_openslide = oslide.dimensions[0];
