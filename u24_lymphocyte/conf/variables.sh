@@ -105,3 +105,8 @@ if [ ! -d ${INTERMEDIATE_FOLDER} ]; then
   mkdir ${INTERMEDIATE_FOLDER} ;
 fi
 
+if [ ! -d ${PATCH_PATH} ]; then
+  mkdir ${PATCH_PATH} ;
+fi
+
+
