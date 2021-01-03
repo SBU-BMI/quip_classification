@@ -8,17 +8,17 @@ From: tensorflow/tensorflow:1.13.1-gpu-py3
  	apt-get -y update && \
 	apt-get -y install python3-pip openslide-tools wget git && \
 	pip install openslide-python scikit-image pymongo 
-	export BASE_DIR="/root/quip_classification/u24_lymphocyte"
-	cd ${BASE_DIR}/prediction/NNFramework_TF_models && \
+	export BASE_DIR="/root/quip_classification"
+	cd ${BASE_DIR}/u24_lymphocyte/prediction/NNFramework_TF_models && \
 	wget -v -O models.zip -L \
 		https://stonybrookmedicine.box.com/shared/static/bl15zu4lwb9cc7ltul15aa8kyrn7kh2d.zip >/dev/null 2>&1 && \
-    unzip -o models.zip && rm -f models.zip && \
-	chmod 0755 ${BASE_DIR}/scripts/*
+    	unzip -o models.zip && rm -f models.zip && \
+	chmod 0755 ${BASE_DIR}/u24_lymphocyte/scripts/*
 
 %environment
-	export BASE_DIR="/root/quip_classification/u24_lymphocyte"
+	export BASE_DIR="/root/quip_classification"
 	export PATH="/usr/local/bin:./":$PATH
 
 %runscript
-	cd ${BASE_DIR}/scripts
+	cd ${BASE_DIR}/u24_lymphocyte/scripts
 	exec "$@"

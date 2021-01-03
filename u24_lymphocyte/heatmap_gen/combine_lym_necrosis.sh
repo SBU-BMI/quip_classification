@@ -7,9 +7,9 @@
 source ../conf/variables.sh
 
 FN=$1
-LYM_FOLDER=${INTERMEDIATE_FOLDER}/patch-level-lym/
-NEC_FOLDER=${INTERMEDIATE_FOLDER}/patch-level-nec/
-OUT_FOLDER=${INTERMEDIATE_FOLDER}/patch-level-merged/
+LYM_FOLDER=${OUT_DIR}/patch-level-lym/
+NEC_FOLDER=${OUT_DIR}/patch-level-nec/
+OUT_FOLDER=${OUT_DIR}/patch-level-merged/
 
 awk 'NR==FNR{
     x=$1;

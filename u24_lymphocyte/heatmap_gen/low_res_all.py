@@ -46,9 +46,9 @@ def low_res(fpath):
                 int(round((i+0.5)*step*4.0)), int(round((j+0.5)*step*4.0)), round(p_val, 6), round(n_val, 6)));
     f.close();
 
-base_directory = os.environ.get('INTERMEDIATE_FOLDER')
+base_directory = os.environ.get('OUT_DIR')
 if base_directory is None:
-   base_directory = "/root/quip_classification/u24_lymphocyte/data/intermediate"
+   base_directory = "../data/output"
 
 directory = str(base_directory)+'/patch-level-merged/';
 for fn in os.listdir(directory):

@@ -23,9 +23,9 @@ heatmap_name = sys.argv[2];
 svs_img_folder=sys.argv[3];
 start_id_multiheat = 4;
 
-base_directory = os.environ.get('INTERMEDIATE_FOLDER')
+base_directory = os.environ.get('OUT_DIR')
 if base_directory is None:
-   base_directory = "/root/quip_classification/u24_lymphocyte/data/intermediate"
+   base_directory = "../data/output"
 
 # Load configs from ../conf/variables.sh
 mongo_host = 'localhost';
