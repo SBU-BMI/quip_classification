@@ -1,4 +1,5 @@
-FROM	nvcr.io/nvidia/tensorflow:18.11-py3
+# FROM	nvcr.io/nvidia/tensorflow:18.11-py3
+FROM tensorflow/tensorflow:1.13.1-gpu-py3
 MAINTAINER quip_classification 
 
 RUN 	apt-get -y update && \
