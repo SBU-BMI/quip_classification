@@ -7,7 +7,7 @@ source ../conf/variables.sh
 
 # create missing output directories
 for i in ${OUT_FOLDERS}; do
-	if [ -d $i ]; then
+	if [ ! -d $i ]; then
 		mkdir -p $i;
 	fi
 done
