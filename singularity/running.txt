@@ -2,7 +2,7 @@ SINGULARITYENV_MODEL_CONFIG_FILENAME='config_vgg-mix_test_ext.ini' \
 SINGULARITYENV_CUDA_VISIBLE_DEVICES='0' \
 SINGULARITYENV_HEATMAP_VERSION_NAME='lym_vgg-mix_probability' \
 SINGULARITYENV_LYM_PREDICTION_BATCH_SIZE=32 \
-singularity run -e --nv --bind /host/<folder>/:/root/quip_classification/u24_lymphocyte/data \
+singularity run -e --nv --bind /host/<folder>/:/data \
 quip_classification.sif svs_2_heatmap.sh
 
 # /host/<folder> is where input images are and where results will be written out. 

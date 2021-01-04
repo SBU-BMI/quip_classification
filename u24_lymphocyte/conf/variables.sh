@@ -22,7 +22,7 @@ if [[ ! -n $LYM_PREDICTION_BATCH_SIZE ]]; then
 fi
 
 # Base data and output directories
-export BASE_DIR=/root/quip_classification
+export BASE_DIR=/quip_app/quip_classification
 export TIL_DIR=${BASE_DIR}/u24_lymphocyte/
 export DATA_DIR=/data
 export OUT_DIR=${DATA_DIR}/output

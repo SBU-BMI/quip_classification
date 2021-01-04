@@ -6,7 +6,7 @@ RUN 	apt-get -y update && \
 	apt-get -y install python3-pip openslide-tools wget && \
 	pip install openslide-python scikit-image pymongo 
 
-ENV	BASE_DIR="/root/quip_classification"
+ENV	BASE_DIR="/quip_app/quip_classification"
 ENV	PATH="./":$PATH
 
 COPY	. ${BASE_DIR}/.
