@@ -13,7 +13,8 @@ From: tensorflow/tensorflow:1.13.1-gpu-py3
 	cd ${BASE_DIR}/u24_lymphocyte/prediction/NNFramework_TF_models && \
 	wget -v -O models.zip -L \
 		https://stonybrookmedicine.box.com/shared/static/bl15zu4lwb9cc7ltul15aa8kyrn7kh2d.zip >/dev/null 2>&1 && \
-    	unzip -o models.zip && rm -f models.zip && \
+    unzip -o models.zip && rm -f models.zip && \
+    bash ./update_path.sh && \
 	chmod 0755 ${BASE_DIR}/u24_lymphocyte/scripts/*
 
 %environment
