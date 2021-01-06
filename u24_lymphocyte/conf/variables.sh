@@ -45,11 +45,12 @@ if [[ -n $MODEL_CONFIG_FILENAME ]]; then
 else
   export LYM_NECRO_CNN_MODEL_PATH=${TIL_DIR}/prediction/NNFramework_TF_models/config_vgg-mix_test_ext.ini ;
 fi
-if [[ -n $LYM_PREDICTION_BATCH_SIZE ]]; then
-  export LYM_NECRO_CNN_MODEL_PATH=${TIL_DIR}/prediction/NNFramework_TF_models/${MODEL_CONFIG_FILENAME} ;
-else
-  export LYM_NECRO_CNN_MODEL_PATH=${TIL_DIR}/prediction/NNFramework_TF_models/config_vgg-mix_test_ext.ini ;
-fi
+
+# if [[ -n $LYM_PREDICTION_BATCH_SIZE ]]; then
+#   export LYM_NECRO_CNN_MODEL_PATH=${TIL_DIR}/prediction/NNFramework_TF_models/${MODEL_CONFIG_FILENAME} ;
+# else
+#   export LYM_NECRO_CNN_MODEL_PATH=${TIL_DIR}/prediction/NNFramework_TF_models/config_vgg-mix_test_ext.ini ;
+# fi
 
 # Training folders
 # The list of case_ids you want to download heaetmaps from
