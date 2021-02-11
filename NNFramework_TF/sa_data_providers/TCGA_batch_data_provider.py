@@ -136,24 +136,30 @@ class TCGABatchDataProvider(AbstractDataProvider):
             self.load_data();
 
         ## get next data point and its corresponding label
-        self.last_fetched_indx = (self.last_fetched_indx + 1);
-        if(self.do_repeat == False):
-            if (self.last_fetched_indx >= self.data_count):
-                if(self.filepath_label == None):
-                    return None;
-                else:
-                    return None, None;
-        else:
-            self.last_fetched_indx = self.last_fetched_indx % self.data_count;
-        actual_indx = self.last_fetched_indx ;
-        if(self.permutation is not None):
-            actual_indx = self.permutation[self.last_fetched_indx];
-        #data_point = self.data[actual_indx, :,:,:];
-        #if(self.filepath_label == None):
-        #    label = None;
-        #else:
-        #    label = self.labels[actual_indx,:];
-        data_point, label = self.load_datapoint(actual_indx);
+        while True:
+            self.last_fetched_indx = (self.last_fetched_indx + 1);
+            if(self.do_repeat == False):
+                if (self.last_fetched_indx >= self.data_count):
+                    if(self.filepath_label == None):
+                        return None;
+                    else:
+                        return None, None;
+            else:
+                self.last_fetched_indx = self.last_fetched_indx % self.data_count;
+            actual_indx = self.last_fetched_indx ;
+            if(self.permutation is not None):
+                actual_indx = self.permutation[self.last_fetched_indx];
+            #data_point = self.data[actual_indx, :,:,:];
+            #if(self.filepath_label == None):
+            #    label = None;
+            #else:
+            #    label = self.labels[actual_indx,:];
+            try:
+                data_point, label = self.load_datapoint(actual_indx);
+                break
+            except:
+                print("bad data file %s" % self.data[actual_indx])
+                continue
 
         ## process the data
         if(self.do_preprocess == True):
