@@ -18,6 +18,12 @@ cd ..
 
 wait;
 
+cd prediction
+nohup bash start.sh &
+cd ..
+
+wait;
+
 cd heatmap_gen
 nohup bash start.sh &
 cd ..
