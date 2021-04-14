@@ -27,6 +27,7 @@ class TCGABatchDataProvider(AbstractDataProvider):
         self.file_name_suffix = args['file_name_suffix'];
         self.pre_resize = bool(strtobool(args['pre_resize']));
         self.do_postprocess = bool(strtobool(args['postprocess']));
+        self.color_norm = bool(strtobool(args['color_norm']));
         self.is_test = is_test; # note that label will be None when is_test is true
         self.filepath_data = filepath_data;
         if(filepath_label == None or filepath_label.strip() == ''):
@@ -68,7 +69,7 @@ class TCGABatchDataProvider(AbstractDataProvider):
             self.tf_post_crop_x1 = tf.placeholder(dtype=tf.int32)
             #print('aug_hue = ', self.aug_hue_max/255.0)
 
-            #######  TODO: NOT FROM Configuration - preset
+            ###### TODO: Make augmentation configured - not preset
             self.tf_data_points_tmp1 = tf.image.random_flip_left_right(self.tf_data_points);
             self.tf_data_points_tmp2 = tf.image.random_flip_up_down(self.tf_data_points_tmp1);
             self.tf_data_points_tmp3 = tf.contrib.image.rotate(self.tf_data_points_tmp2, self.tf_angles);
@@ -136,29 +137,35 @@ class TCGABatchDataProvider(AbstractDataProvider):
             self.load_data();
 
         ## get next data point and its corresponding label
-        self.last_fetched_indx = (self.last_fetched_indx + 1);
-        if(self.do_repeat == False):
-            if (self.last_fetched_indx >= self.data_count):
-                if(self.filepath_label == None):
-                    return None;
-                else:
-                    return None, None;
-        else:
-            self.last_fetched_indx = self.last_fetched_indx % self.data_count;
-        actual_indx = self.last_fetched_indx ;
-        if(self.permutation is not None):
-            actual_indx = self.permutation[self.last_fetched_indx];
-        #data_point = self.data[actual_indx, :,:,:];
-        #if(self.filepath_label == None):
-        #    label = None;
-        #else:
-        #    label = self.labels[actual_indx,:];
-        data_point, label = self.load_datapoint(actual_indx);
+        while True:
+            self.last_fetched_indx = (self.last_fetched_indx + 1);
+            if(self.do_repeat == False):
+                if (self.last_fetched_indx >= self.data_count):
+                    if(self.filepath_label == None):
+                        return None;
+                    else:
+                        return None, None;
+            else:
+                self.last_fetched_indx = self.last_fetched_indx % self.data_count;
+            actual_indx = self.last_fetched_indx ;
+            if(self.permutation is not None):
+                actual_indx = self.permutation[self.last_fetched_indx];
+            #data_point = self.data[actual_indx, :,:,:];
+            #if(self.filepath_label == None):
+            #    label = None;
+            #else:
+            #    label = self.labels[actual_indx,:];
+            try:
+                data_point, label = self.load_datapoint(actual_indx);
+                break
+            except:
+                print("bad data file %s" % self.data[actual_indx])
+                continue
 
         ## process the data
         if(self.do_preprocess == True):
             data_point, label = self.preprocess(data_point, label);
-    
+        #print(data_point.shape);
        
         #if(self.do_augment == True):
         #    data_point, label = self.augment(data_point, label);
@@ -176,8 +183,10 @@ class TCGABatchDataProvider(AbstractDataProvider):
         #data_point = tf.image.per_image_standardization(data_point);
 
         if(self.filepath_label == None):
+            #print("return 1")
             return data_point;
         else:
+            #print("return 2")
             return data_point, label;
 
     ## returns None, None if there is no more data to retrieve and repeat = false
@@ -343,7 +352,21 @@ class TCGABatchDataProvider(AbstractDataProvider):
             data_points[0,:,:,:] = dp;
             for i in range(1, n):
                 #data_points[i], data_labels[i] = self.get_next_one();
-                data_points[i, :,:,:], data_labels[i,:] = self.get_next_one();
+                #data_points[i, :,:,:], data_labels[i,:] = self.get_next_one();
+                dp, data_labels[i,:] = self.get_next_one();                
+                if(self.in_size_y <=  dp.shape[0]):
+                    starty = (dp.shape[0] - self.in_size_y)//2;
+                    startx = (dp.shape[1] - self.in_size_x)//2;
+                    endy = starty + self.in_size_y;
+                    endx = startx + self.in_size_x;
+                    data_points[i, :,:,:] = dp[starty:endy, startx:endx, :];
+                else:
+                    starty = -(dp.shape[0] - self.in_size_y)//2;
+                    startx = -(dp.shape[1] - self.in_size_x)//2;
+                    endy = starty + dp.shape[0];
+                    endx = startx + dp.shape[1];
+                    data_points[i, starty:endy, startx:endx,:] = dp[:,:, :];
+
                 #datapoints_list.append(data_point_tmp);
                 #labels_list.append(data_label_tmp);
         else:
@@ -351,7 +374,20 @@ class TCGABatchDataProvider(AbstractDataProvider):
             data_labels = np.zeros((n, self.n_classes))
             for i in range(0, n):
                 #data_points[i], data_labels[i] = self.get_next_one();
-                data_points[i, :,:,:], data_labels[i,:] = self.get_next_one();
+                #data_points[i, :,:,:], data_labels[i,:] = self.get_next_one();
+                dp, data_labels[i,:] = self.get_next_one();                
+                if(self.in_size_y <=  dp.shape[0]):
+                    starty = (dp.shape[0] - self.in_size_y)//2;
+                    startx = (dp.shape[1] - self.in_size_x)//2;
+                    endy = starty + self.in_size_y;
+                    endx = startx + self.in_size_x;
+                    data_points[i, :,:,:] = dp[starty:endy, startx:endx, :];
+                else:
+                    starty = -(dp.shape[0] - self.in_size_y)//2;
+                    startx = -(dp.shape[1] - self.in_size_x)//2;
+                    endy = starty + dp.shape[0];
+                    endx = startx + dp.shape[1];
+                    data_points[i, starty:endy, startx:endx,:] = dp[:,:, :];
                 #datapoints_list.append(data_point_tmp);
                 #labels_list.append(data_label_tmp);
         #tic2 = time.time();
@@ -1114,3 +1150,6 @@ class TCGABatchDataProvider(AbstractDataProvider):
 
 
         return data_points2  
+
+
+
