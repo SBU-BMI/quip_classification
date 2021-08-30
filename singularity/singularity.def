@@ -20,6 +20,8 @@ From: tensorflow/tensorflow:1.13.1-gpu-py3
 %environment
 	export BASE_DIR="/quip_app/quip_classification"
 	export PATH="/usr/local/bin:./":$PATH
+	export MODEL_URL="https://stonybrookmedicine.box.com/shared/static/bl15zu4lwb9cc7ltul15aa8kyrn7kh2d.zip"
+	export MODEL_VER="v1.0"
 
 %runscript
 	cd ${BASE_DIR}/u24_lymphocyte/scripts
