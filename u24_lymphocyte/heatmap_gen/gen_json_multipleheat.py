@@ -139,6 +139,7 @@ dict_img['case_id'] = caseid;
 dict_img['subject_id'] = subjectid;
 
 analysis_execution_date = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
+heatmap_name = heatmap_name+"_"+os.environ.get('TIL_VERSION')
 
 dict_analysis = {};
 dict_analysis['cancer_type'] = slide_type;
