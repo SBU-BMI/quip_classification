@@ -2,7 +2,7 @@ BootStrap: docker
 From: tensorflow/tensorflow:1.13.1-gpu-py3
 
 %files
-	../* /quip_app/quip_classification/
+	../ /quip_app/quip_classification/
 
 %post
  	apt-get -y update && \
