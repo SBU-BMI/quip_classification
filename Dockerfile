@@ -4,7 +4,7 @@ MAINTAINER quip_classification
 
 RUN 	apt-get -y update && \
 	apt-get -y install python3-pip openslide-tools wget git && \
-	pip install openslide-python scikit-image pymongo 
+	pip install imageio==2.9.0 openslide-python==1.1.2 scikit-image==0.15.0 pymongo 
 
 ENV	BASE_DIR="/quip_app/quip_classification"
 ENV	PATH="./":$PATH
