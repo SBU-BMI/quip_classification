@@ -66,10 +66,16 @@ This script does not run CNNs on GPUs.
 #### 5. Execute:
 Run the below command replacing the {placeholders} with appropriate settings:  
 
+
+Note: use of `nvidia-docker` is deprecated from docker 19.03 onwards. Use instead:
+```
+docker run --gpus='{GPU ID}' ...
+```
+
 nvidia-docker run --name test_til_pipeline  -it \\  
--v *{svs folder path}*:/root/quip_classification/u24_lymphocyte/data/svs  \\  
--v *{patches folder path}*:/root/quip_classification/u24_lymphocyte/data/patches   \\  
--v *{output folder path}*:/root/quip_classification/u24_lymphocyte/data/output   \\  
+-v *{svs folder path}*:/data/svs  \\  
+-v *{patches folder path}*:/data/patches   \\  
+-v *{output folder path}*:/data/output   \\  
 -e MODEL_CONFIG_FILENAME='*{model config file name}*'  \\  
 -e CUDA_VISIBLE_DEVICES='*{GPU ID}*'  \\  
 -e HEATMAP_VERSION_NAME='*{heatmap version name}*'  \\  
@@ -81,9 +87,9 @@ nvidia-docker run --name test_til_pipeline  -it \\
 **This is an example command with some settings:**  
 
 nvidia-docker run --name til_pipeline --rm -it \\  
--v /nfs/bigbrain/shahira/svs:/root/quip_classification/u24_lymphocyte/data/svs  \\  
--v /nfs/bigbrain/shahira/patches:/root/quip_classification/u24_lymphocyte/data/patches   \\  
--v /nfs/bigbrain/shahira/til_output:/root/quip_classification/u24_lymphocyte/data/output   \\  
+-v /nfs/bigbrain/shahira/svs:/data/svs  \\  
+-v /nfs/bigbrain/shahira/patches:/data/patches   \\  
+-v /nfs/bigbrain/shahira/til_output:/data/output   \\  
 -e MODEL_CONFIG_FILENAME='config_vgg-mix_test_ext.ini'  \\  
 -e CUDA_VISIBLE_DEVICES='0'  \\  
 -e HEATMAP_VERSION_NAME='lym_vgg-mix_probability'  \\  
